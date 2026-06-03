@@ -1,0 +1,36 @@
+{
+  "name": "@mentisix/ui",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Mentisix bespoke component primitives — thin instruments, mono labels.",
+  "type": "module",
+  "sideEffects": ["./src/styles.css", "./dist/styles.css"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/styles.css dist/styles.css",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "biome check src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@mentisix/brand": "workspace:*",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@mentisix/config-typescript": "workspace:*",
+    "@types/react": "^19.0.1",
+    "typescript": "5.7.2"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0 <20.0.0"
+  }
+}

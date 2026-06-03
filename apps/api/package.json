@@ -1,0 +1,35 @@
+{
+  "name": "@mentisix/api",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Mentisix API — all backend logic: runs, harness, scoring, persistence.",
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "lint": "biome check src",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@mentisix/sim": "workspace:*",
+    "@mentisix/types": "workspace:*",
+    "@nestjs/common": "11.0.1",
+    "@nestjs/config": "4.0.0",
+    "@nestjs/core": "11.0.1",
+    "@nestjs/platform-express": "11.0.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.1",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@mentisix/config-typescript": "workspace:*",
+    "@nestjs/cli": "11.0.0",
+    "@nestjs/schematics": "11.0.0",
+    "@types/express": "5.0.0",
+    "@types/node": "22.10.2",
+    "typescript": "5.7.2"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "mentisix",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A proving ground for machine minds.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "19.5.0",
+    "@commitlint/config-conventional": "19.5.0",
+    "husky": "9.1.7",
+    "lint-staged": "15.2.10",
+    "turbo": "2.3.3",
+    "typescript": "5.7.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"]
+  }
+}

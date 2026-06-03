@@ -1,0 +1,178 @@
+/* ============================================================
+   @mentisix/ui — component primitives
+   Consumes --mx-* tokens from @mentisix/brand/styles/tokens.css.
+   Import once at the root of the consuming app.
+   ============================================================ */
+
+/* ---------- Button ---------- */
+.mx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  border: 1px solid var(--mx-line);
+  border-radius: var(--mx-radius-xs);
+  background: transparent;
+  color: var(--mx-bone);
+  font-family: var(--mx-font-mono);
+  font-size: 12px;
+  font-weight: var(--mx-weight-medium);
+  letter-spacing: var(--mx-track-mono);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--mx-dur) var(--mx-ease), color var(--mx-dur) var(--mx-ease),
+    background var(--mx-dur) var(--mx-ease), box-shadow var(--mx-dur) var(--mx-ease);
+}
+.mx-btn:hover {
+  border-color: var(--mx-fog);
+}
+.mx-btn:focus-visible {
+  outline: none;
+  border-color: var(--mx-signal-dim);
+  box-shadow: 0 0 0 1px var(--mx-signal-dim);
+}
+.mx-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mx-btn--signal {
+  border-color: var(--mx-signal-dim);
+  color: var(--mx-signal);
+}
+.mx-btn--signal:hover {
+  border-color: var(--mx-signal);
+  background: rgba(0, 229, 176, 0.05);
+  box-shadow: 0 0 0 1px var(--mx-signal), var(--mx-glow-signal);
+}
+
+.mx-btn--ghost {
+  border-color: transparent;
+  color: var(--mx-fog);
+}
+.mx-btn--ghost:hover {
+  color: var(--mx-bone);
+}
+
+.mx-btn__dot {
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+/* ---------- Card ---------- */
+.mx-card {
+  border: 1px solid var(--mx-line);
+  background: linear-gradient(var(--mx-slate), var(--mx-void));
+  border-radius: var(--mx-radius-sm);
+  overflow: hidden;
+}
+.mx-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--mx-line);
+}
+.mx-card__title {
+  font-family: var(--mx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mx-fog);
+}
+
+/* ---------- Kicker (eyebrow label) ---------- */
+.mx-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--mx-fog);
+}
+.mx-kicker::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--mx-signal);
+  display: inline-block;
+}
+.mx-kicker__idx {
+  color: var(--mx-signal-dim);
+}
+
+/* ---------- Tag (LED status) ---------- */
+.mx-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 11px;
+  border: 1px solid var(--mx-line);
+  border-radius: var(--mx-radius-xs);
+  color: var(--mx-fog);
+  font-family: var(--mx-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mx-tag__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mx-fog);
+}
+.mx-tag--pass {
+  color: var(--mx-signal);
+  border-color: var(--mx-signal-dim);
+}
+.mx-tag--pass .mx-tag__led {
+  background: var(--mx-signal);
+  box-shadow: 0 0 8px var(--mx-signal);
+}
+.mx-tag--fail {
+  color: var(--mx-fault);
+  border-color: #5a2420;
+}
+.mx-tag--fail .mx-tag__led {
+  background: var(--mx-fault);
+}
+.mx-tag--run .mx-tag__led {
+  background: var(--mx-fog);
+  animation: mx-blink 1.1s steps(2) infinite;
+}
+@keyframes mx-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* ---------- Input ---------- */
+.mx-input {
+  background: var(--mx-void-2);
+  border: 1px solid var(--mx-line);
+  border-radius: var(--mx-radius-xs);
+  padding: 11px 14px;
+  color: var(--mx-bone);
+  font-family: var(--mx-font-mono);
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color var(--mx-dur-fast) var(--mx-ease), box-shadow var(--mx-dur-fast)
+    var(--mx-ease);
+}
+.mx-input::placeholder {
+  color: var(--mx-fog-dim);
+}
+.mx-input:focus {
+  border-color: var(--mx-signal-dim);
+  box-shadow: 0 0 0 1px var(--mx-signal-dim);
+}
+
+/* ---------- utility: tabular numerals ---------- */
+.mx-tabular {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}

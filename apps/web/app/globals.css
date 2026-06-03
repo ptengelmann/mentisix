@@ -1,0 +1,36 @@
+@import "@mentisix/brand/styles/fonts.css";
+@import "@mentisix/brand/styles/tokens.css";
+@import "@mentisix/ui/styles.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- root surface ---- */
+html,
+body {
+  background: var(--mx-void);
+  color: var(--mx-bone);
+  font-family: var(--mx-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 0;
+}
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+::selection {
+  background: var(--mx-signal);
+  color: #04130f;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
