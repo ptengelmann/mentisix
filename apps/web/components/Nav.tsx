@@ -41,6 +41,9 @@ export function Nav() {
         <Link href="/dataset" className="mx-navlink">
           Dataset
         </Link>
+        <Link href="/methodology" className="mx-navlink">
+          Methodology
+        </Link>
         <Link href="/dojo">
           <Button variant="signal" dot>
             Enter the dojo
