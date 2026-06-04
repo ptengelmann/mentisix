@@ -83,6 +83,37 @@
   color: var(--mx-fog);
 }
 
+/* ---------- Nav link ---------- */
+.mx-navlink {
+  font-family: var(--mx-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mx-fog);
+  transition: color var(--mx-dur) var(--mx-ease);
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 2px;
+}
+.mx-navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--mx-signal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--mx-dur) var(--mx-ease);
+}
+.mx-navlink:hover {
+  color: var(--mx-signal);
+}
+.mx-navlink:hover::after {
+  transform: scaleX(1);
+}
+
 /* ---------- Kicker (eyebrow label) ---------- */
 .mx-kicker {
   display: inline-flex;
