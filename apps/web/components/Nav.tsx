@@ -35,14 +35,14 @@ export function Nav() {
         </span>
       </Link>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 24 }}>
+        <Link href="/findings" className="mx-navlink">
+          Findings
+        </Link>
         <Link href="/leaderboard" className="mx-navlink">
           Leaderboard
         </Link>
         <Link href="/dataset" className="mx-navlink">
           Dataset
-        </Link>
-        <Link href="/methodology" className="mx-navlink">
-          Methodology
         </Link>
         <Link href="/dojo">
           <Button variant="signal" dot>
