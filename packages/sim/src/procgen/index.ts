@@ -53,7 +53,7 @@ export function createWorld(seed: number, options: CreateWorldOptions = {}): Wor
 
 function hashSeed(seed: number, layoutAttempt: number, placementAttempt: number): number {
   // mix three small ints into one 32-bit seed; the constants are arbitrary
-  // primes — only determinism matters
+  // primes. only determinism matters
   let h = seed | 0;
   h = Math.imul(h ^ layoutAttempt, 0x85ebca6b) | 0;
   h = Math.imul(h ^ placementAttempt, 0xc2b2ae35) | 0;

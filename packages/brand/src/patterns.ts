@@ -1,5 +1,5 @@
 /**
- * Mentisix generative lattice patterns — canvas renderers.
+ * Mentisix generative lattice patterns. canvas renderers.
  *
  * Four brand motifs, all derived from the grid. Use at low contrast as
  * texture, never as noise. Honors prefers-reduced-motion (single static

@@ -8,9 +8,9 @@
  * `Challenge<S, A, O>` instance and registering it.
  *
  * Generic params:
- *   S — state type. Opaque to the harness; passed back into step/observe/etc.
- *   A — action type. The structured output the LLM agent produces each turn.
- *   O — observation type. What the agent receives each turn.
+ *   S = state type. Opaque to the harness; passed back into step/observe/etc.
+ *   A = action type. The structured output the LLM agent produces each turn.
+ *   O = observation type. What the agent receives each turn.
  */
 
 import type { Difficulty } from './types.js';

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "description": "Grid-world cognition engine — pure TS, no I/O.",
+  "description": "Grid-world cognition engine. Pure TS, no I/O.",
   "type": "module",
   "exports": {
     ".": {

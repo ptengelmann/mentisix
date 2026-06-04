@@ -22,7 +22,7 @@ export function generateLayout(
   for (let r = 0; r < config.height; r++) {
     for (let c = 0; c < config.width; c++) {
       if (r === start[0] && c === start[1]) continue;
-      // never wall the cells immediately around the start — guarantees agent
+      // never wall the cells immediately around the start. guarantees agent
       // can move on step 1 regardless of seed
       if (Math.abs(r - start[0]) + Math.abs(c - start[1]) <= 1) continue;
       if (rng.next() < WALL_DENSITY) {
@@ -32,7 +32,7 @@ export function generateLayout(
     }
   }
 
-  // ensure connectedness — open walls bordering reachable regions until
+  // ensure connectedness. open walls bordering reachable regions until
   // every floor cell is reachable from start
   let safety = config.width * config.height;
   while (safety-- > 0) {
@@ -81,7 +81,7 @@ function findFrontierWalls(
   for (let r = 0; r < config.height; r++) {
     for (let c = 0; c < config.width; c++) {
       if (grid[r]?.[c]?.kind !== 'wall') continue;
-      // collect walls that border a reachable cell — knocking them down
+      // collect walls that border a reachable cell. knocking them down
       // grows the connected component, eventually swallowing every island
       for (const dir of DIRECTIONS) {
         const neighbor = stepDir([r, c], dir);

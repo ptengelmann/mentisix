@@ -1,7 +1,7 @@
 /**
- * Mentisix lattice mark — generator.
+ * Mentisix lattice mark. generator.
  *
- * The logo is a 6x6 grid; 16 lit cells trace an "M" — the path an agent
+ * The logo is a 6x6 grid; 16 lit cells trace an "M". the path an agent
  * walked through a maze. Pure functions: render to data, then to SVG string,
  * or use the React component in `./components/Mark.tsx`.
  */
@@ -31,11 +31,11 @@ export type MarkCell = {
 };
 
 export type MarkOptions = {
-  /** Lit cell fill — defaults to signal mint. Pass 'currentColor' for mono use. */
+  /** Lit cell fill. defaults to signal mint. Pass 'currentColor' for mono use. */
   lit?: string;
-  /** Fog cell fill — defaults to a slightly-raised slate. */
+  /** Fog cell fill. defaults to a slightly-raised slate. */
   fogFill?: string;
-  /** Fog cell stroke — defaults to lattice line. */
+  /** Fog cell stroke. defaults to lattice line. */
   fogStroke?: string;
   /** Whether to render the unlit fog cells at all. */
   showFog?: boolean;

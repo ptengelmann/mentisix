@@ -1,9 +1,9 @@
 /* ============================================================
-   MENTISIX — Design Tokens (source of truth)
+   MENTISIX. Design Tokens (source of truth)
    Import this once at the root, then reference var(--mx-*).
    ============================================================ */
 :root {
-  /* —— Color · neutrals (carry ~92% of every surface) —— */
+  /* , ,  Color · neutrals (carry ~92% of every surface) , ,  */
   --mx-void: #0a0c10; /* base canvas / page background        */
   --mx-void-2: #07090c; /* deepest wells, inputs                */
   --mx-slate: #11141a; /* cards, raised surfaces               */
@@ -14,15 +14,15 @@
   --mx-fog: #7a8694; /* muted / secondary text               */
   --mx-fog-dim: #4a5460; /* tertiary text, captions              */
 
-  /* —— Color · signal (ration to <=8% of a surface) —— */
+  /* , ,  Color · signal (ration to <=8% of a surface) , ,  */
   --mx-signal: #00e5b0; /* THE agent · live state · pass · CTA  */
   --mx-signal-dim: #0b6e58; /* signal borders, low-emphasis accent  */
-  --mx-fault: #ff5a4d; /* failure ONLY — never decorative      */
+  --mx-fault: #ff5a4d; /* failure ONLY. never decorative      */
 
-  /* —— Color · light surface (marketing / on-bone) —— */
+  /* , ,  Color · light surface (marketing / on-bone) , ,  */
   --mx-bone-page: #f2f2ec; /* light background                     */
 
-  /* —— Typography —— */
+  /* , ,  Typography , ,  */
   --mx-font-sans: "General Sans", ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
   --mx-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
@@ -34,7 +34,7 @@
   --mx-text-sm: 13px;
   --mx-text-mono: 12px;
 
-  /* tracking — tightens as size grows */
+  /* tracking. tightens as size grows */
   --mx-track-display: -0.045em;
   --mx-track-h1: -0.03em;
   --mx-track-h2: -0.02em;
@@ -44,12 +44,12 @@
   --mx-weight-medium: 500;
   --mx-weight-semibold: 600;
 
-  /* —— Radius (sharp instrument — keep small) —— */
+  /* , ,  Radius (sharp instrument. keep small) , ,  */
   --mx-radius-xs: 2px; /* buttons, inputs, tags                     */
   --mx-radius-sm: 3px; /* cards                                     */
   --mx-radius-cell: 6%; /* lattice cell corner (relative)            */
 
-  /* —— Spacing — derived from the lattice cell —— */
+  /* , ,  Spacing. derived from the lattice cell , ,  */
   --mx-cell: 14px; /* one grid cell                             */
   --mx-gutter: 1.2px; /* gutter between cells                      */
   --mx-space-1: 8px;
@@ -58,13 +58,13 @@
   --mx-space-4: 40px;
   --mx-space-5: 64px;
 
-  /* —— Motion —— */
+  /* , ,  Motion , ,  */
   --mx-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
   --mx-dur-fast: .2s;
   --mx-dur: .25s;
   --mx-dur-slow: .8s;
 
-  /* —— Elevation / glow —— */
+  /* , ,  Elevation / glow , ,  */
   --mx-glow-signal: 0 0 28px -8px var(--mx-signal);
 }
 

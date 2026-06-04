@@ -9,7 +9,7 @@ export type PatternProps = Omit<HTMLAttributes<HTMLCanvasElement>, 'children'> &
 };
 
 /**
- * Mentisix generative pattern — React canvas wrapper.
+ * Mentisix generative pattern. React canvas wrapper.
  *
  * Mounts a `<canvas>` and runs `initPattern` against it. The canvas fills its
  * container, so wrap it in a positioned/sized element.

@@ -2,7 +2,7 @@
  * Mentisix shared domain types.
  *
  * The wire contracts between apps/web and apps/api live here. They are
- * authoritative — both sides import these instead of redeclaring shapes.
+ * authoritative; both sides import these instead of redeclaring shapes.
  */
 
 import type {
@@ -64,7 +64,7 @@ export type RunOptions = {
   maxWallClockMs?: number;
   /**
    * Minimum delay between turns in ms. Useful for fast providers (Solver,
-   * Mock) so the canvas animation has time to play. Default 0 — real LLMs
+   * Mock) so the canvas animation has time to play. Default 0; real LLMs
    * are slow enough on their own.
    */
   stepDelayMs?: number;
@@ -168,6 +168,18 @@ export type LeaderboardRow = {
   bestScore: number;
   bestStepsUsed: number;
   runs: number;
+  /** Number of passed runs. Passes / runs = raw pass rate. */
+  passes: number;
+  /**
+   * Bayesian-shrunken pass rate: (passes + 1) / (runs + 2), the posterior
+   * mean of a Beta(1,1) prior + observed runs. Stops 1-run lucky passes
+   * from crowning a model.
+   */
+  passRateShrunk: number;
+  /** Cost per passed run in GBP, computed from published per-token prices. */
+  costPerSuccessGBP?: number;
+  /** Total GBP spent across all runs for this model. */
+  totalCostGBP?: number;
   /** Handle on the run that produced this row's best score, if any. */
   handle?: string;
 };
@@ -175,7 +187,7 @@ export type LeaderboardRow = {
 /**
  * One row of the public Mentisix dataset. Streamed as JSONL from
  * `/datasets/:challenge/runs.jsonl`. Researchers, labs, and curious
- * onlookers can consume this directly — the schema is part of the
+ * onlookers can consume this directly; the schema is part of the
  * benchmark contract.
  */
 export type DatasetRow = {

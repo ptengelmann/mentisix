@@ -1,6 +1,6 @@
 # @mentisix/brand
 
-Design tokens, lattice mark, generative patterns, and the bespoke cell-glyph icon set for Mentisix. **This package is the single source of truth for the visual identity** — apps and other packages MUST consume from here rather than reproducing tokens locally.
+Design tokens, lattice mark, generative patterns, and the bespoke cell-glyph icon set for Mentisix. **This package is the single source of truth for the visual identity** · apps and other packages MUST consume from here rather than reproducing tokens locally.
 
 ## Usage
 
