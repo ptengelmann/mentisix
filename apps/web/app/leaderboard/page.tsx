@@ -135,15 +135,29 @@ function Row({ row }: { row: LeaderboardRow }) {
             <ProviderLogo provider={row.model.provider} size={18} />
           </span>
           <span style={{ display: 'flex', flexDirection: 'column' }}>
-            <span
-              style={{
-                fontSize: 14.5,
-                fontWeight: 500,
-                color: 'var(--mx-bone)',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              {row.model.model}
+            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 10 }}>
+              {row.handle ? (
+                <span
+                  style={{
+                    fontFamily: 'var(--mx-font-mono)',
+                    fontSize: 13,
+                    color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  @{row.handle}
+                </span>
+              ) : null}
+              <span
+                style={{
+                  fontSize: 14.5,
+                  fontWeight: 500,
+                  color: row.handle ? 'var(--mx-fog)' : 'var(--mx-bone)',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {row.model.model}
+              </span>
             </span>
             <span
               style={{

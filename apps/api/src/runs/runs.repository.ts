@@ -17,6 +17,7 @@ export type PersistedRun = {
   createdAt: Date;
   finishedAt: Date | null;
   error: string | null;
+  handle: string | null;
 };
 
 @Injectable()
@@ -38,6 +39,7 @@ export class RunsRepository {
       createdAt: record.createdAt,
       finishedAt: record.finishedAt,
       error: record.error,
+      handle: record.handle,
     });
   }
 
@@ -54,6 +56,7 @@ export class RunsRepository {
       msUsed: record.msUsed,
       createdAt: record.createdAt.toISOString(),
       finishedAt: record.finishedAt?.toISOString() ?? null,
+      ...(record.handle ? { handle: record.handle } : {}),
       ...(record.error ? { error: record.error } : {}),
     };
   }

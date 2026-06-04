@@ -19,6 +19,7 @@ type RunRecord = {
   msUsed: number;
   createdAt: string;
   finishedAt: string | null;
+  handle: string | null;
   error?: string;
   events$: ReplaySubject<RunEvent>;
 };
@@ -53,6 +54,7 @@ export class RunsService {
       msUsed: 0,
       createdAt: new Date().toISOString(),
       finishedAt: null,
+      handle: dto.handle ?? null,
       events$,
     };
     this.runs.set(id, record);
@@ -111,6 +113,7 @@ export class RunsService {
           createdAt: new Date(record.createdAt),
           finishedAt: record.finishedAt ? new Date(record.finishedAt) : null,
           error: record.error ?? null,
+          handle: record.handle,
         });
       } catch (err) {
         this.logger.error(
@@ -135,6 +138,7 @@ export class RunsService {
       msUsed: r.msUsed,
       createdAt: r.createdAt,
       finishedAt: r.finishedAt,
+      ...(r.handle ? { handle: r.handle } : {}),
       ...(r.error ? { error: r.error } : {}),
     };
   }

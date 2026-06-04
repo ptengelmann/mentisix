@@ -1,4 +1,4 @@
-import { PROVIDERS } from '@mentisix/types';
+import { HANDLE_PATTERN, PROVIDERS } from '@mentisix/types';
 import { z } from 'zod';
 
 export const RunStartSchema = z.object({
@@ -9,6 +9,7 @@ export const RunStartSchema = z.object({
     model: z.string().min(1).max(120),
   }),
   apiKey: z.string().min(1).max(512),
+  handle: z.string().regex(HANDLE_PATTERN).optional(),
   options: z
     .object({
       maxSteps: z.number().int().positive().max(1000).optional(),

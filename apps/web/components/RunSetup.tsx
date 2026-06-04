@@ -1,9 +1,11 @@
 'use client';
 
-import type { ProviderId, RunStartRequest } from '@mentisix/types';
+import { HANDLE_PATTERN, type ProviderId, type RunStartRequest } from '@mentisix/types';
 import { Button, Input, Kicker } from '@mentisix/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProviderLogo } from './ProviderLogo';
+
+const HANDLE_STORAGE_KEY = 'mx.handle';
 
 const PROVIDERS: { id: ProviderId; label: string; defaultModel: string; defaultDelay: number }[] = [
   { id: 'solver', label: 'Solver', defaultModel: 'solver-1', defaultDelay: 220 },
@@ -33,15 +35,35 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
   const [apiKey, setApiKey] = useState('');
   const [seed, setSeed] = useState('');
   const [stepDelayMs, setStepDelayMs] = useState(220);
+  const [handle, setHandle] = useState('');
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(HANDLE_STORAGE_KEY);
+      if (saved && HANDLE_PATTERN.test(saved)) setHandle(saved);
+    } catch {
+      // localStorage blocked (private mode, etc.) — silently skip.
+    }
+  }, []);
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const trimmedHandle = handle.trim().toLowerCase();
+    const validHandle = HANDLE_PATTERN.test(trimmedHandle) ? trimmedHandle : '';
+    if (validHandle) {
+      try {
+        window.localStorage.setItem(HANDLE_STORAGE_KEY, validHandle);
+      } catch {
+        // ignore
+      }
+    }
     const req: RunStartRequest = {
       challenge: 'treasure-hunt',
       model: { provider, model: model.trim() || defaultFor(provider) },
       apiKey: apiKey.trim() || 'mock-key',
       options: { stepDelayMs },
       ...(seed.trim() ? { seed: Number.parseInt(seed.trim(), 10) } : {}),
+      ...(validHandle ? { handle: validHandle } : {}),
     };
     onStart(req);
   };
@@ -146,6 +168,16 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
           onChange={(e) => setSeed(e.target.value.replace(/[^0-9]/g, ''))}
           placeholder="random"
           autoComplete="off"
+        />
+      </Field>
+
+      <Field label="Handle" hint="Optional · a-z, 0-9, _ · 16 chars max · shown on the board">
+        <Input
+          value={handle}
+          onChange={(e) => setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 16))}
+          placeholder="anonymous"
+          autoComplete="off"
+          spellCheck={false}
         />
       </Field>
 
