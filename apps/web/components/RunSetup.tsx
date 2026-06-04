@@ -152,11 +152,6 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
               difficulties={DIFFICULTY_BY_CHALLENGE[c.id]}
               onSelect={() => {
                 setChallenge(c.id);
-                if (c.id !== 'treasure-hunt' && provider === 'solver') {
-                  setProvider('mock');
-                  setModel('mock-1');
-                  setStepDelayMs(100);
-                }
               }}
               onPickDifficulty={(d) => {
                 setChallenge(c.id);
@@ -754,10 +749,11 @@ function defaultFor(p: ProviderId): string {
   return PROVIDERS.find((x) => x.id === p)?.defaultModel ?? 'mock-1';
 }
 
-function availableProviders(c: ChallengeSlug) {
-  // Solver is a BFS reference player that only knows Treasure Hunt;
-  // hide it for other challenges.
-  return c === 'treasure-hunt' ? PROVIDERS : PROVIDERS.filter((p) => p.id !== 'solver');
+function availableProviders(_c: ChallengeSlug) {
+  // Solver knows every challenge now (BFS for Treasure Hunt, perfect
+  // recall map for Memory Probe). Keep the signature in case future
+  // challenges need to opt out.
+  return PROVIDERS;
 }
 
 function DiceIcon() {

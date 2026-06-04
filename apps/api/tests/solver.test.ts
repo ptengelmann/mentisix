@@ -1,3 +1,4 @@
+import type { Difficulty } from '@mentisix/sim';
 import type { RunEvent } from '@mentisix/types';
 import { describe, expect, it } from 'vitest';
 import { HarnessService } from '../src/harness/harness.service.js';
@@ -80,4 +81,32 @@ describe('SolverProvider', () => {
     expect(finish.status).toBe('passed');
     expect(finish.stepsUsed).toBeLessThan(180);
   });
+
+  it.each(['easy', 'medium', 'hard'] as const satisfies readonly Difficulty[])(
+    'wins every Memory Probe seed in [0, 20) at %s difficulty',
+    async (difficulty) => {
+      const failures: { seed: number; status: string }[] = [];
+      for (let seed = 0; seed < 20; seed++) {
+        const service = new HarnessService();
+        const provider = new SolverProvider();
+        const finish = await service.run({
+          runId: `solver-mp-${difficulty}-${seed}`,
+          seed,
+          challenge: 'memory-probe',
+          difficulty,
+          model: { provider: 'solver', model: 'solver-1' },
+          apiKey: 'unused',
+          options: {},
+          provider,
+          emit: () => {},
+        });
+        if (finish.status !== 'passed') {
+          failures.push({ seed, status: finish.status });
+        }
+      }
+      expect(failures, `solver failed on MP ${difficulty}: ${JSON.stringify(failures)}`).toEqual(
+        [],
+      );
+    },
+  );
 });
