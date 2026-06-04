@@ -87,6 +87,8 @@ export class HarnessService {
           model: ctx.model.model,
           system: SYSTEM_PROMPT,
           user: serializeObservation(obs),
+          observation: obs,
+          runId: ctx.runId,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -124,6 +126,10 @@ export class HarnessService {
         treasuresCollected: world.treasuresCollected,
         status: world.status,
       });
+
+      if (ctx.options.stepDelayMs && world.status === 'running') {
+        await new Promise<void>((resolve) => setTimeout(resolve, ctx.options.stepDelayMs));
+      }
     }
 
     const breakdown = score(world);

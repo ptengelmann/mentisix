@@ -6,7 +6,7 @@
   "description": "Mentisix web — the public dojo. Frontend only.",
   "scripts": {
     "build": "next build",
-    "dev": "next dev --port 3000 --turbopack",
+    "dev": "next dev --port 3000",
     "start": "next start --port 3000",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",

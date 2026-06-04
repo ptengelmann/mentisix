@@ -19,8 +19,14 @@ import type {
 export type ChallengeSlug = 'treasure-hunt';
 export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
 
-export type ProviderId = 'openai' | 'anthropic' | 'groq' | 'mock';
-export const PROVIDERS: readonly ProviderId[] = ['openai', 'anthropic', 'groq', 'mock'] as const;
+export type ProviderId = 'openai' | 'anthropic' | 'groq' | 'mock' | 'solver';
+export const PROVIDERS: readonly ProviderId[] = [
+  'openai',
+  'anthropic',
+  'groq',
+  'mock',
+  'solver',
+] as const;
 
 export type ModelRef = {
   provider: ProviderId;
@@ -36,6 +42,12 @@ export type RunOptions = {
   maxTokens?: number;
   /** Hard cap on wall-clock time for the whole run in ms. Default: 5 * 60_000. */
   maxWallClockMs?: number;
+  /**
+   * Minimum delay between turns in ms. Useful for fast providers (Solver,
+   * Mock) so the canvas animation has time to play. Default 0 — real LLMs
+   * are slow enough on their own.
+   */
+  stepDelayMs?: number;
 };
 
 export type RunStartRequest = {

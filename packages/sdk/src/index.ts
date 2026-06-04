@@ -32,7 +32,9 @@ export class MentisixClient {
 
   constructor(options: ClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
-    this.#fetch = options.fetch ?? globalThis.fetch;
+    // bind to globalThis — otherwise `globalThis.fetch` assigned as a
+    // bare method reference throws "Illegal invocation" in the browser
+    this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
   }
 
   async health(): Promise<HealthResponse> {
