@@ -96,34 +96,58 @@ export function RunViewer() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, auto) minmax(280px, 1fr)',
+          gridTemplateColumns:
+            lastReq?.challenge === 'memory-probe'
+              ? 'minmax(0, 1fr)'
+              : 'minmax(0, auto) minmax(280px, 1fr)',
           gap: 20,
           alignItems: 'start',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Card title="Grid · Treasure Hunt v0">
-            <div style={{ padding: 20 }}>
-              <GridCanvas
-                grid={state.grid}
-                agent={state.agent}
-                seenCells={state.seenCells}
-                visionRadius={state.world?.visionRadius ?? 3}
-                inventory={state.inventory}
-              />
-            </div>
-          </Card>
-          <StatsReadout
-            step={state.step}
-            maxSteps={state.maxSteps}
-            treasuresCollected={state.treasuresCollected}
-            treasuresTotal={state.treasuresTotal || 3}
-            tokensUsed={state.tokensUsed}
-            msUsed={state.msUsed}
-          />
-        </div>
+        {lastReq?.challenge !== 'memory-probe' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Card title="Grid · Treasure Hunt v0">
+              <div style={{ padding: 20 }}>
+                <GridCanvas
+                  grid={state.grid}
+                  agent={state.agent}
+                  seenCells={state.seenCells}
+                  visionRadius={state.world?.visionRadius ?? 3}
+                  inventory={state.inventory}
+                />
+              </div>
+            </Card>
+            <StatsReadout
+              step={state.step}
+              maxSteps={state.maxSteps}
+              treasuresCollected={state.treasuresCollected}
+              treasuresTotal={state.treasuresTotal || 3}
+              tokensUsed={state.tokensUsed}
+              msUsed={state.msUsed}
+            />
+          </div>
+        ) : null}
 
-        <Card title="Reasoning" meta={inventoryLabel(state.inventory)}>
+        <Card
+          title={lastReq?.challenge === 'memory-probe' ? 'Live reasoning' : 'Reasoning'}
+          meta={
+            lastReq?.challenge === 'memory-probe' ? (
+              <span
+                style={{
+                  fontFamily: 'var(--mx-font-mono)',
+                  fontSize: 11,
+                  color: 'var(--mx-fog-dim)',
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                turn {state.step} · open replay for full conversation log
+              </span>
+            ) : (
+              inventoryLabel(state.inventory)
+            )
+          }
+        >
           <div style={{ height: 560, maxHeight: 'calc(100dvh - 280px)' }}>
             <ReasoningFeed entries={state.reasonings} />
           </div>

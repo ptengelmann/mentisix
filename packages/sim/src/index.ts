@@ -43,5 +43,22 @@ export type {
   DifficultyManifest,
 } from './challenge.js';
 
-export const SIM_VERSION = '0.1.0';
-export const SUPPORTED_CHALLENGES = ['treasure-hunt'] as const;
+export {
+  PROBE_CONFIG_BY_DIFFICULTY,
+  createProbe,
+  observeProbe,
+  scoreProbe,
+  stepProbe,
+  type Answer as ProbeAnswer,
+  type Fact as ProbeFact,
+  type ProbeAction,
+  type ProbeConfig,
+  type ProbeObservation,
+  type ProbeScoreBreakdown,
+  type ProbeState,
+  type ProbeStatus,
+  type ProbeTurn,
+} from './memory-probe/index.js';
+
+export const SIM_VERSION = '0.2.0';
+export const SUPPORTED_CHALLENGES = ['treasure-hunt', 'memory-probe'] as const;

@@ -2,6 +2,7 @@ import type { RunReplay } from '@mentisix/sdk';
 import { Button, Card, Tag } from '@mentisix/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { MemoryProbeReplayPlayer } from '../../../components/MemoryProbeReplayPlayer';
 import { Nav } from '../../../components/Nav';
 import { ProviderLogo } from '../../../components/ProviderLogo';
 import { ReplayPlayer } from '../../../components/ReplayPlayer';
@@ -47,9 +48,7 @@ export default async function ReplayPage({ params }: { params: Params }) {
         <ReplayHeader summary={summary} />
 
         <div style={{ marginTop: 32 }}>
-          {events.length > 0 ? (
-            <ReplayPlayer runId={summary.id} events={events} />
-          ) : (
+          {events.length === 0 ? (
             <Card title="No replay available">
               <div
                 style={{
@@ -63,6 +62,10 @@ export default async function ReplayPage({ params }: { params: Params }) {
                 final score and metadata are still on the leaderboard.
               </div>
             </Card>
+          ) : summary.challenge === 'memory-probe' ? (
+            <MemoryProbeReplayPlayer runId={summary.id} events={events} />
+          ) : (
+            <ReplayPlayer runId={summary.id} events={events} />
           )}
         </div>
 

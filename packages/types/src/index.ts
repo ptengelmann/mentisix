@@ -11,17 +11,15 @@ import type {
   Cell,
   Difficulty,
   KeyColor,
-  Observation,
   Position,
-  ScoreBreakdown,
   WorldStatus,
 } from '@mentisix/sim';
 
 export type { Difficulty } from '@mentisix/sim';
 export const DIFFICULTIES = ['easy', 'medium', 'hard'] as const satisfies readonly Difficulty[];
 
-export type ChallengeSlug = 'treasure-hunt';
-export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
+export type ChallengeSlug = 'treasure-hunt' | 'memory-probe';
+export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt', 'memory-probe'] as const;
 
 export type ProviderId =
   | 'openai'
@@ -129,7 +127,7 @@ export type WorldSnapshot = {
 
 export type RunEvent =
   | { kind: 'hello'; runId: string; seed: number; initialWorld: WorldSnapshot }
-  | { kind: 'observation'; step: number; observation: Observation }
+  | { kind: 'observation'; step: number; observation: unknown }
   | {
       kind: 'thinking';
       step: number;
@@ -146,8 +144,22 @@ export type RunEvent =
       treasuresCollected: number;
       status: WorldStatus;
     }
-  | { kind: 'done'; status: RunStatus; score: ScoreBreakdown; tokensUsed: number; msUsed: number }
-  | { kind: 'error'; message: string };
+  | { kind: 'done'; status: RunStatus; score: unknown; tokensUsed: number; msUsed: number }
+  | { kind: 'error'; message: string }
+  // Memory Probe events. Event kinds are namespaced with mp_ so the
+  // wire type stays a single discriminated union; the client checks
+  // summary.challenge to pick the right renderer.
+  | { kind: 'mp_hello'; runId: string; seed: number; maxTurns: number; factCount: number }
+  | { kind: 'mp_action'; step: number; answer: string; expected?: string; correct?: boolean }
+  | {
+      kind: 'mp_state';
+      step: number;
+      turn: number;
+      factsRevealed: number;
+      answersGiven: number;
+      answersCorrect: number;
+      status: 'running' | 'won' | 'lost';
+    };
 
 export type LeaderboardRow = {
   rank: number;

@@ -1,22 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
-
-// Inline the schema at the root. Passing `name` would wrap it as
-// `{ $ref, definitions: { AgentResponse: ... } }`, which OpenAI strict
-// mode rejects because the root lacks `type: "object"`.
-const SCHEMA = zodToJsonSchema(AgentResponseSchema, { $refStrategy: 'none' });
-
-/** Exposed for regression tests. */
-export const OPENAI_STRUCTURED_SCHEMA = schemaForOpenAI(SCHEMA);
 
 @Injectable()
 export class OpenAIProvider implements ModelProvider {
   readonly id = 'openai' as const;
 
-  async generate(input: GenerateInput): Promise<GenerateOutput> {
+  async generate<T = unknown>(input: GenerateInput): Promise<GenerateOutput<T>> {
     const client = new OpenAI({ apiKey: input.apiKey });
 
     const completion = await client.chat.completions.create({
@@ -28,8 +18,8 @@ export class OpenAIProvider implements ModelProvider {
       response_format: {
         type: 'json_schema',
         json_schema: {
-          name: 'AgentResponse',
-          schema: OPENAI_STRUCTURED_SCHEMA,
+          name: input.responseSchema.name,
+          schema: input.responseSchema.jsonSchema,
           strict: true,
         },
       },
@@ -39,38 +29,12 @@ export class OpenAIProvider implements ModelProvider {
     const content = choice?.message.content;
     if (!content) throw new Error('openai: empty completion content');
 
-    const parsed = AgentResponseSchema.parse(JSON.parse(content));
+    const parsed = input.responseSchema.zod.parse(JSON.parse(content)) as T & {
+      reasoning: string;
+    };
     return {
       response: parsed,
       tokensUsed: completion.usage?.total_tokens ?? 0,
     };
   }
-}
-
-/**
- * OpenAI strict JSON Schema requires top-level `additionalProperties: false`
- * on every object and all keys in `required`. zod-to-json-schema is mostly
- * there; we normalize what differs.
- */
-function schemaForOpenAI(schema: ReturnType<typeof zodToJsonSchema>): Record<string, unknown> {
-  // OpenAI strict mode rejects $schema metadata at the root.
-  const { $schema: _meta, ...rest } = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
-  walk(rest);
-  return rest;
-}
-
-function walk(node: unknown): void {
-  if (!node || typeof node !== 'object') return;
-  const obj = node as Record<string, unknown>;
-  if (obj.type === 'object') {
-    if (!('additionalProperties' in obj)) obj.additionalProperties = false;
-    if (obj.properties && typeof obj.properties === 'object') {
-      obj.required = Object.keys(obj.properties as Record<string, unknown>);
-      for (const v of Object.values(obj.properties as Record<string, unknown>)) walk(v);
-    }
-  }
-  if (Array.isArray(obj.anyOf)) for (const v of obj.anyOf) walk(v);
-  if (Array.isArray(obj.oneOf)) for (const v of obj.oneOf) walk(v);
-  if (Array.isArray(obj.allOf)) for (const v of obj.allOf) walk(v);
-  if (obj.items) walk(obj.items);
 }

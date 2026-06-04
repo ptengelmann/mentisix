@@ -1,4 +1,5 @@
 import type { Challenge, ChallengeId, ChallengeManifest } from '@mentisix/sim';
+import { memoryProbeChallenge } from './memory-probe/index.js';
 import { treasureHuntChallenge } from './treasure-hunt/index.js';
 
 /**
@@ -20,7 +21,7 @@ type AnyChallenge = Challenge<any, any, any>;
 // to `ChallengeId` does not require a same-PR implementation.
 export const CHALLENGE_REGISTRY: Partial<Record<ChallengeId, AnyChallenge>> = {
   'treasure-hunt': treasureHuntChallenge,
-  // 'memory-probe': memoryProbeChallenge, // Sunday
+  'memory-probe': memoryProbeChallenge,
 };
 
 export function getChallenge(id: ChallengeId): AnyChallenge {

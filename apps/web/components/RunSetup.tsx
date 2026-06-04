@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type ChallengeSlug,
   type Difficulty,
   HANDLE_PATTERN,
   type ProviderId,
@@ -12,15 +13,30 @@ import { ProviderLogo } from './ProviderLogo';
 
 const HANDLE_STORAGE_KEY = 'mx.handle';
 
-const DIFFICULTY_OPTIONS: {
-  id: Difficulty;
+const CHALLENGE_OPTIONS: {
+  id: ChallengeSlug;
   label: string;
-  description: string;
+  tagline: string;
 }[] = [
-  { id: 'easy', label: 'Easy', description: '10×10 · 1 treasure · 5×5 vision' },
-  { id: 'medium', label: 'Medium', description: '12×12 · 3 treasures · keys + doors' },
-  { id: 'hard', label: 'Hard', description: '16×16 · 5 treasures · 300 steps' },
+  { id: 'treasure-hunt', label: 'Treasure Hunt', tagline: 'Spatial reasoning · fog-of-war grid' },
+  { id: 'memory-probe', label: 'Memory Probe', tagline: 'In-context recall under noise' },
 ];
+
+const DIFFICULTY_BY_CHALLENGE: Record<
+  ChallengeSlug,
+  { id: Difficulty; label: string; description: string }[]
+> = {
+  'treasure-hunt': [
+    { id: 'easy', label: 'Easy', description: '10×10 · 1 treasure · 5×5 vision' },
+    { id: 'medium', label: 'Medium', description: '12×12 · 3 treasures · keys + doors' },
+    { id: 'hard', label: 'Hard', description: '16×16 · 5 treasures · 300 steps' },
+  ],
+  'memory-probe': [
+    { id: 'easy', label: 'Easy', description: '1 fact · 1 question · 20 turns' },
+    { id: 'medium', label: 'Medium', description: '2 facts · 2 questions · 40 turns' },
+    { id: 'hard', label: 'Hard', description: '3 facts · 3 questions · 80 turns' },
+  ],
+};
 
 const PROVIDERS: { id: ProviderId; label: string; defaultModel: string; defaultDelay: number }[] = [
   { id: 'solver', label: 'Solver', defaultModel: 'solver-1', defaultDelay: 220 },
@@ -45,6 +61,7 @@ export type RunSetupProps = {
 };
 
 export function RunSetup({ onStart, disabled }: RunSetupProps) {
+  const [challenge, setChallenge] = useState<ChallengeSlug>('treasure-hunt');
   const [provider, setProvider] = useState<ProviderId>('solver');
   const [model, setModel] = useState('solver-1');
   const [apiKey, setApiKey] = useState('');
@@ -74,7 +91,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
       }
     }
     const req: RunStartRequest = {
-      challenge: 'treasure-hunt',
+      challenge,
       difficulty,
       model: { provider, model: model.trim() || defaultFor(provider) },
       apiKey: apiKey.trim() || 'mock-key',
@@ -109,16 +126,78 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
         </h2>
       </div>
 
-      <Field label="Provider">
+      <Field label="Challenge">
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${PROVIDERS.length}, 1fr)`,
+            gridTemplateColumns: `repeat(${CHALLENGE_OPTIONS.length}, 1fr)`,
             gap: 1,
             background: 'var(--mx-line-soft)',
           }}
         >
-          {PROVIDERS.map((p) => (
+          {CHALLENGE_OPTIONS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => {
+                setChallenge(c.id);
+                // Solver only knows Treasure Hunt; switch to mock for others.
+                if (c.id !== 'treasure-hunt' && provider === 'solver') {
+                  setProvider('mock');
+                  setModel('mock-1');
+                  setStepDelayMs(100);
+                }
+              }}
+              style={{
+                background: challenge === c.id ? 'var(--mx-slate)' : 'var(--mx-void)',
+                border: 'none',
+                padding: '16px 12px 18px',
+                color: challenge === c.id ? 'var(--mx-signal)' : 'var(--mx-fog)',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 6,
+                transition:
+                  'color var(--mx-dur) var(--mx-ease), background var(--mx-dur) var(--mx-ease)',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em',
+                  color: challenge === c.id ? 'var(--mx-signal)' : 'var(--mx-bone)',
+                }}
+              >
+                {c.label}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--mx-font-mono)',
+                  fontSize: 10,
+                  letterSpacing: '0.14em',
+                  color: 'var(--mx-fog-dim)',
+                  textAlign: 'center',
+                }}
+              >
+                {c.tagline}
+              </span>
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="Provider">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${availableProviders(challenge).length}, 1fr)`,
+            gap: 1,
+            background: 'var(--mx-line-soft)',
+          }}
+        >
+          {availableProviders(challenge).map((p) => (
             <button
               key={p.id}
               type="button"
@@ -152,16 +231,16 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
         </div>
       </Field>
 
-      <Field label="Difficulty" hint="Frozen world configs. Same seed gives the same world.">
+      <Field label="Difficulty" hint="Frozen configs. Same seed gives the same world.">
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${DIFFICULTY_OPTIONS.length}, 1fr)`,
+            gridTemplateColumns: `repeat(${DIFFICULTY_BY_CHALLENGE[challenge].length}, 1fr)`,
             gap: 1,
             background: 'var(--mx-line-soft)',
           }}
         >
-          {DIFFICULTY_OPTIONS.map((d) => (
+          {DIFFICULTY_BY_CHALLENGE[challenge].map((d) => (
             <button
               key={d.id}
               type="button"
@@ -368,6 +447,12 @@ function Field({
 
 function defaultFor(p: ProviderId): string {
   return PROVIDERS.find((x) => x.id === p)?.defaultModel ?? 'mock-1';
+}
+
+function availableProviders(c: ChallengeSlug) {
+  // Solver is a BFS reference player that only knows Treasure Hunt;
+  // hide it for other challenges.
+  return c === 'treasure-hunt' ? PROVIDERS : PROVIDERS.filter((p) => p.id !== 'solver');
 }
 
 function DiceIcon() {
