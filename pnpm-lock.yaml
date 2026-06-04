@@ -108,6 +108,9 @@ importers:
       '@mentisix/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+      '@mentisix/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
       '@mentisix/types':
         specifier: workspace:*
         version: link:../../packages/types

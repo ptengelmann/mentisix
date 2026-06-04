@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@mentisix/brand', '@mentisix/ui', '@mentisix/sdk', '@mentisix/types'],
+  transpilePackages: [
+    '@mentisix/brand',
+    '@mentisix/ui',
+    '@mentisix/sdk',
+    '@mentisix/sim',
+    '@mentisix/types',
+  ],
   experimental: {
     typedRoutes: true,
   },

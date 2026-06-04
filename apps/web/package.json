@@ -15,6 +15,7 @@
   "dependencies": {
     "@mentisix/brand": "workspace:*",
     "@mentisix/sdk": "workspace:*",
+    "@mentisix/sim": "workspace:*",
     "@mentisix/types": "workspace:*",
     "@mentisix/ui": "workspace:*",
     "next": "15.1.2",
