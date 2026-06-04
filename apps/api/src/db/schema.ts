@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * One row per completed Treasure Hunt run. The harness writes here on
@@ -23,6 +23,7 @@ export const runs = pgTable(
     finishedAt: timestamp('finished_at', { withTimezone: true }),
     error: text('error'),
     handle: text('handle'),
+    events: jsonb('events'),
   },
   (t) => ({
     byChallengeStatusScore: index('runs_challenge_status_score_idx').on(

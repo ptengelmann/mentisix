@@ -1,5 +1,6 @@
-import type { ProviderId, RunStatus, RunSummary } from '@mentisix/types';
-import { Inject, Injectable } from '@nestjs/common';
+import type { ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module.js';
 import { runs } from '../db/schema.js';
 
@@ -18,6 +19,12 @@ export type PersistedRun = {
   finishedAt: Date | null;
   error: string | null;
   handle: string | null;
+  events: RunEvent[];
+};
+
+export type PublicRunReplay = {
+  summary: RunSummary;
+  events: RunEvent[];
 };
 
 @Injectable()
@@ -40,7 +47,30 @@ export class RunsRepository {
       finishedAt: record.finishedAt,
       error: record.error,
       handle: record.handle,
+      events: record.events,
     });
+  }
+
+  async findReplay(id: string): Promise<PublicRunReplay> {
+    const row = await this.db.query.runs.findFirst({ where: eq(runs.id, id) });
+    if (!row) throw new NotFoundException(`run ${id} not found`);
+    const summary: RunSummary = {
+      id: row.id,
+      challenge: row.challenge as 'treasure-hunt',
+      seed: row.seed,
+      model: { provider: row.provider as ProviderId, model: row.model },
+      status: row.status as RunStatus,
+      score: row.score,
+      stepsUsed: row.stepsUsed,
+      tokensUsed: row.tokensUsed,
+      msUsed: row.msUsed,
+      createdAt: row.createdAt.toISOString(),
+      finishedAt: row.finishedAt?.toISOString() ?? null,
+      ...(row.handle ? { handle: row.handle } : {}),
+      ...(row.error ? { error: row.error } : {}),
+    };
+    const events = (row.events ?? []) as RunEvent[];
+    return { summary, events };
   }
 
   toSummary(record: PersistedRun): RunSummary {

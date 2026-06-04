@@ -2,7 +2,8 @@
 
 import type { RunStartRequest } from '@mentisix/types';
 import { Button, Card, Kicker, Tag } from '@mentisix/ui';
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import Link from 'next/link';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { client } from '../lib/api';
 import { type RunUiState, initialState, reducer } from '../lib/run-state';
 import { GridCanvas } from './GridCanvas';
@@ -135,6 +136,8 @@ export function RunViewer() {
         />
       ) : null}
 
+      {state.status === 'done' && state.runId ? <ShareCard runId={state.runId} /> : null}
+
       {state.error ? (
         <div
           style={{
@@ -212,6 +215,61 @@ function FinalCard({
         <FinalStat label="Steps" value={String(stepsUsed)} />
         <FinalStat label="Tokens" value={String(tokensUsed)} />
         <FinalStat label="Wall-clock" value={`${Math.round(msUsed)}`} suffix="ms" />
+      </div>
+    </Card>
+  );
+}
+
+function ShareCard({ runId }: { runId: string }) {
+  const [copied, setCopied] = useState(false);
+  const url =
+    typeof window === 'undefined' ? `/runs/${runId}` : `${window.location.origin}/runs/${runId}`;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // ignore — fall back to manual copy from the input
+    }
+  };
+
+  return (
+    <Card title="Share this run">
+      <div
+        style={{
+          padding: '20px 22px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          flexWrap: 'wrap',
+        }}
+      >
+        <code
+          style={{
+            flex: 1,
+            minWidth: 240,
+            background: 'var(--mx-void)',
+            border: '1px solid var(--mx-line-soft)',
+            padding: '11px 14px',
+            fontFamily: 'var(--mx-font-mono)',
+            fontSize: 12,
+            color: 'var(--mx-bone)',
+            letterSpacing: '0.02em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {url}
+        </code>
+        <Button onClick={copy} variant="signal" dot>
+          {copied ? 'Copied' : 'Copy link'}
+        </Button>
+        <Link href={`/runs/${runId}`}>
+          <Button>Open replay</Button>
+        </Link>
       </div>
     </Card>
   );
