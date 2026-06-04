@@ -152,6 +152,50 @@ export type LeaderboardRow = {
   handle?: string;
 };
 
+/**
+ * One row of the public Mentisix dataset. Streamed as JSONL from
+ * `/datasets/:challenge/runs.jsonl`. Researchers, labs, and curious
+ * onlookers can consume this directly — the schema is part of the
+ * benchmark contract.
+ */
+export type DatasetRow = {
+  id: string;
+  challenge: ChallengeSlug;
+  seed: number;
+  provider: ProviderId;
+  model: string;
+  status: RunStatus;
+  score: number | null;
+  stepsUsed: number;
+  tokensUsed: number;
+  msUsed: number;
+  handle: string | null;
+  createdAt: string;
+  finishedAt: string | null;
+  /** Full step-by-step event log for the run. Same shape as the live SSE stream. */
+  events: RunEvent[];
+};
+
+export type DatasetStatsByModel = {
+  provider: ProviderId;
+  model: string;
+  runs: number;
+  passes: number;
+  passRate: number;
+  totalTokens: number;
+  avgScore: number | null;
+};
+
+export type DatasetStats = {
+  challenge: ChallengeSlug;
+  totalRuns: number;
+  totalPassedRuns: number;
+  totalTokens: number;
+  totalMs: number;
+  byModel: DatasetStatsByModel[];
+  generatedAt: string;
+};
+
 export const MENTISIX = {
   name: 'Mentisix',
   tagline: 'A proving ground for machine minds.',
