@@ -20,12 +20,15 @@ describe('SolverProvider', () => {
         emit: (e) => events.push(e),
       });
       if (finish.status !== 'passed') {
-        const last = events.findLast((e) => e.kind === 'state');
-        failures.push({
-          seed,
-          status: finish.status,
-          collected: last && last.kind === 'state' ? last.treasuresCollected : 0,
-        });
+        let lastCollected = 0;
+        for (let i = events.length - 1; i >= 0; i--) {
+          const e = events[i];
+          if (e?.kind === 'state') {
+            lastCollected = e.treasuresCollected;
+            break;
+          }
+        }
+        failures.push({ seed, status: finish.status, collected: lastCollected });
       }
     }
     expect(failures, `solver failed on: ${JSON.stringify(failures)}`).toEqual([]);

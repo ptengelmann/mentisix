@@ -126,6 +126,10 @@ export class HarnessService {
         treasuresCollected: world.treasuresCollected,
         status: world.status,
       });
+
+      if (ctx.options.stepDelayMs && world.status === 'running') {
+        await new Promise<void>((resolve) => setTimeout(resolve, ctx.options.stepDelayMs));
+      }
     }
 
     const breakdown = score(world);

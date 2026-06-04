@@ -19,6 +19,7 @@ export const RunStartSchema = z.object({
         .positive()
         .max(30 * 60_000)
         .optional(),
+      stepDelayMs: z.number().int().nonnegative().max(2000).optional(),
     })
     .optional(),
 });

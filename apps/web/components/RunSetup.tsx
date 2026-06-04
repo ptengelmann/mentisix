@@ -5,12 +5,19 @@ import { Button, Input, Kicker } from '@mentisix/ui';
 import { useState } from 'react';
 import { ProviderLogo } from './ProviderLogo';
 
-const PROVIDERS: { id: ProviderId; label: string; defaultModel: string }[] = [
-  { id: 'solver', label: 'Solver', defaultModel: 'solver-1' },
-  { id: 'anthropic', label: 'Claude', defaultModel: 'claude-sonnet-4-6' },
-  { id: 'openai', label: 'OpenAI', defaultModel: 'gpt-4o' },
-  { id: 'groq', label: 'Groq', defaultModel: 'llama-3.3-70b-versatile' },
-  { id: 'mock', label: 'Mock', defaultModel: 'mock-1' },
+const PROVIDERS: { id: ProviderId; label: string; defaultModel: string; defaultDelay: number }[] = [
+  { id: 'solver', label: 'Solver', defaultModel: 'solver-1', defaultDelay: 220 },
+  { id: 'anthropic', label: 'Claude', defaultModel: 'claude-sonnet-4-6', defaultDelay: 0 },
+  { id: 'openai', label: 'OpenAI', defaultModel: 'gpt-4o', defaultDelay: 0 },
+  { id: 'groq', label: 'Groq', defaultModel: 'llama-3.3-70b-versatile', defaultDelay: 0 },
+  { id: 'mock', label: 'Mock', defaultModel: 'mock-1', defaultDelay: 100 },
+];
+
+const SPEEDS: { label: string; ms: number }[] = [
+  { label: 'Real-time', ms: 0 },
+  { label: 'Fast', ms: 80 },
+  { label: 'Normal', ms: 220 },
+  { label: 'Slow', ms: 500 },
 ];
 
 export type RunSetupProps = {
@@ -23,6 +30,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
   const [model, setModel] = useState('solver-1');
   const [apiKey, setApiKey] = useState('');
   const [seed, setSeed] = useState('');
+  const [stepDelayMs, setStepDelayMs] = useState(220);
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,6 +38,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
       challenge: 'treasure-hunt',
       model: { provider, model: model.trim() || defaultFor(provider) },
       apiKey: apiKey.trim() || 'mock-key',
+      options: { stepDelayMs },
       ...(seed.trim() ? { seed: Number.parseInt(seed.trim(), 10) } : {}),
     };
     onStart(req);
@@ -75,6 +84,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
               onClick={() => {
                 setProvider(p.id);
                 setModel(p.defaultModel);
+                setStepDelayMs(p.defaultDelay);
               }}
               style={{
                 background: provider === p.id ? 'var(--mx-slate)' : 'var(--mx-void)',
@@ -131,6 +141,40 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
           placeholder="random"
           autoComplete="off"
         />
+      </Field>
+
+      <Field label="Speed" hint="Slows fast providers so the canvas can animate">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${SPEEDS.length}, 1fr)`,
+            gap: 1,
+            background: 'var(--mx-line-soft)',
+          }}
+        >
+          {SPEEDS.map((s) => (
+            <button
+              key={s.label}
+              type="button"
+              onClick={() => setStepDelayMs(s.ms)}
+              style={{
+                background: stepDelayMs === s.ms ? 'var(--mx-slate)' : 'var(--mx-void)',
+                border: 'none',
+                padding: '11px 8px',
+                color: stepDelayMs === s.ms ? 'var(--mx-signal)' : 'var(--mx-fog)',
+                fontFamily: 'var(--mx-font-mono)',
+                fontSize: 10,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition:
+                  'color var(--mx-dur) var(--mx-ease), background var(--mx-dur) var(--mx-ease)',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </Field>
 
       <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>

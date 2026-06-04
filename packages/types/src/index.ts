@@ -42,6 +42,12 @@ export type RunOptions = {
   maxTokens?: number;
   /** Hard cap on wall-clock time for the whole run in ms. Default: 5 * 60_000. */
   maxWallClockMs?: number;
+  /**
+   * Minimum delay between turns in ms. Useful for fast providers (Solver,
+   * Mock) so the canvas animation has time to play. Default 0 — real LLMs
+   * are slow enough on their own.
+   */
+  stepDelayMs?: number;
 };
 
 export type RunStartRequest = {
