@@ -31,5 +31,8 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css}": ["biome check --write --no-errors-on-unmatched"]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@biomejs/biome", "@nestjs/core", "sharp"]
   }
 }
