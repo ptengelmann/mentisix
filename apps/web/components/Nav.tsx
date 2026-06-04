@@ -34,11 +34,25 @@ export function Nav() {
           Mentis<span style={{ color: 'var(--mx-signal)' }}>ix</span>
         </span>
       </Link>
-      <Link href="/dojo">
-        <Button variant="signal" dot>
-          Enter the dojo
-        </Button>
-      </Link>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 24 }}>
+        <Link
+          href="/leaderboard"
+          style={{
+            fontFamily: 'var(--mx-font-mono)',
+            fontSize: 11,
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'var(--mx-fog)',
+          }}
+        >
+          Leaderboard
+        </Link>
+        <Link href="/dojo">
+          <Button variant="signal" dot>
+            Enter the dojo
+          </Button>
+        </Link>
+      </div>
     </nav>
   );
 }
