@@ -4,24 +4,30 @@
   "private": true,
   "license": "UNLICENSED",
   "description": "Mentisix API — all backend logic: runs, harness, scoring, persistence.",
+  "type": "module",
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
-    "lint": "biome check src",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check src tests",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.32.1",
     "@mentisix/sim": "workspace:*",
     "@mentisix/types": "workspace:*",
     "@nestjs/common": "11.0.1",
     "@nestjs/config": "4.0.0",
     "@nestjs/core": "11.0.1",
     "@nestjs/platform-express": "11.0.1",
+    "openai": "4.77.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
-    "zod": "3.24.1"
+    "zod": "3.24.1",
+    "zod-to-json-schema": "3.24.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -30,6 +36,9 @@
     "@nestjs/schematics": "11.0.0",
     "@types/express": "5.0.0",
     "@types/node": "22.10.2",
-    "typescript": "5.7.2"
+    "@types/supertest": "6.0.2",
+    "supertest": "7.0.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
   }
 }
