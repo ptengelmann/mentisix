@@ -21,6 +21,7 @@ export class LeaderboardRepository {
       best_score: number;
       best_steps_used: number;
       runs: string | number;
+      handle: string | null;
     }>(sql`
       with ranked as (
         select
@@ -28,6 +29,7 @@ export class LeaderboardRepository {
           model,
           score,
           steps_used,
+          handle,
           row_number() over (
             partition by provider, model
             order by score desc nulls last, steps_used asc
@@ -46,6 +48,7 @@ export class LeaderboardRepository {
         ranked.model,
         ranked.score as best_score,
         ranked.steps_used as best_steps_used,
+        ranked.handle,
         counts.runs
       from ranked
       join counts on counts.provider = ranked.provider and counts.model = ranked.model
@@ -60,6 +63,7 @@ export class LeaderboardRepository {
       bestScore: Number(row.best_score),
       bestStepsUsed: Number(row.best_steps_used),
       runs: Number(row.runs),
+      ...(row.handle ? { handle: row.handle } : {}),
     }));
   }
 }

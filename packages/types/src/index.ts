@@ -68,12 +68,22 @@ export type RunOptions = {
   stepDelayMs?: number;
 };
 
+/**
+ * Display handle attached to a run. Lowercase ASCII letters, digits, and
+ * underscores; 1–16 chars. Validated server-side, never trusted from the
+ * wire. Shown on the leaderboard as `@<handle>` so visitors can claim
+ * their runs without an account.
+ */
+export const HANDLE_PATTERN = /^[a-z0-9_]{1,16}$/;
+
 export type RunStartRequest = {
   challenge: ChallengeSlug;
   seed?: number;
   model: ModelRef;
   /** User's API key — held in memory only, never persisted. */
   apiKey: string;
+  /** Optional display tag rendered on the leaderboard. */
+  handle?: string;
   options?: RunOptions;
 };
 
@@ -95,6 +105,7 @@ export type RunSummary = {
   msUsed: number;
   createdAt: string;
   finishedAt: string | null;
+  handle?: string;
   error?: string;
 };
 
@@ -137,6 +148,8 @@ export type LeaderboardRow = {
   bestScore: number;
   bestStepsUsed: number;
   runs: number;
+  /** Handle on the run that produced this row's best score, if any. */
+  handle?: string;
 };
 
 export const MENTISIX = {

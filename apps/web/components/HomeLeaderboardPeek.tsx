@@ -96,7 +96,19 @@ function Row({ row }: { row: LeaderboardRow }) {
           <span style={{ color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)' }}>
             <ProviderLogo provider={row.model.provider} size={16} />
           </span>
-          <span style={{ fontSize: 13, color: 'var(--mx-bone)', letterSpacing: '-0.01em' }}>
+          {row.handle ? (
+            <span
+              style={{
+                fontFamily: 'var(--mx-font-mono)',
+                fontSize: 12,
+                color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)',
+                letterSpacing: '0.02em',
+              }}
+            >
+              @{row.handle}
+            </span>
+          ) : null}
+          <span style={{ fontSize: 13, color: 'var(--mx-fog)', letterSpacing: '-0.01em' }}>
             {row.model.model}
           </span>
         </span>

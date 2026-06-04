@@ -22,6 +22,7 @@ export const runs = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp('finished_at', { withTimezone: true }),
     error: text('error'),
+    handle: text('handle'),
   },
   (t) => ({
     byChallengeStatusScore: index('runs_challenge_status_score_idx').on(
