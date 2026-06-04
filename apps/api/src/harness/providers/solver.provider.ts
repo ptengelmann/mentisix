@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import type { AgentActionToken } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
+type TreasureHuntResponse = { reasoning: string; action: AgentActionToken };
+
 type SolverMemory = {
   /** "r,c" → cell we've directly observed. */
   knownCells: Map<string, Cell>;
@@ -34,17 +36,19 @@ export class SolverProvider implements ModelProvider {
   readonly id = 'solver' as const;
   private readonly memory = new Map<string, SolverMemory>();
 
-  async generate(input: GenerateInput): Promise<GenerateOutput> {
-    const obs = input.observation;
-    if (!obs) {
-      return wait('solver: no structured observation');
+  async generate<T = unknown>(input: GenerateInput): Promise<GenerateOutput<T>> {
+    const obs = input.observation as Observation | undefined;
+    if (!obs || !Array.isArray((obs as Observation).visible)) {
+      // Solver only knows Treasure Hunt; for anything else, bail with a
+      // wait action and let the schema validator surface the mismatch.
+      return wait('solver: no structured observation') as GenerateOutput<T>;
     }
     const runKey = input.runId ?? '__default__';
     const mem = this.getMemory(runKey);
     this.absorbObservation(mem, obs);
 
     const decision = this.decide(mem, obs);
-    return { response: decision, tokensUsed: 0 };
+    return { response: decision, tokensUsed: 0 } as unknown as GenerateOutput<T>;
   }
 
   private getMemory(runId: string): SolverMemory {
@@ -72,7 +76,7 @@ export class SolverProvider implements ModelProvider {
     }
   }
 
-  private decide(mem: SolverMemory, obs: Observation): GenerateOutput['response'] {
+  private decide(mem: SolverMemory, obs: Observation): TreasureHuntResponse {
     const here = mem.knownCells.get(`${obs.position[0]},${obs.position[1]}`);
     if (here?.kind === 'treasure' || here?.kind === 'key') {
       return {
@@ -145,9 +149,9 @@ export class SolverProvider implements ModelProvider {
   }
 }
 
-function wait(reason: string): GenerateOutput {
+function wait<T = unknown>(reason: string): GenerateOutput<T> {
   return {
-    response: { reasoning: reason, action: 'wait' },
+    response: { reasoning: reason, action: 'wait' } as unknown as T & { reasoning: string },
     tokensUsed: 0,
   };
 }

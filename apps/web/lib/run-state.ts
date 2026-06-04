@@ -1,4 +1,12 @@
-import type { Action, Cell, KeyColor, Position, ScoreBreakdown, WorldStatus } from '@mentisix/sim';
+import type {
+  Action,
+  Cell,
+  KeyColor,
+  Observation,
+  Position,
+  ScoreBreakdown,
+  WorldStatus,
+} from '@mentisix/sim';
 import type { RunEvent, RunStatus, WorldSnapshot } from '@mentisix/types';
 
 export type ViewerStatus = 'idle' | 'starting' | 'live' | 'done' | 'error';
@@ -111,10 +119,11 @@ export function reducer(state: RunUiState, evt: RunUiEvent): RunUiState {
   }
 
   if (e.kind === 'observation') {
+    const obs = e.observation as Observation;
     return {
       ...state,
       step: e.step,
-      treasuresTotal: e.observation.treasuresTotal,
+      treasuresTotal: obs.treasuresTotal ?? state.treasuresTotal,
     };
   }
 
@@ -156,7 +165,7 @@ export function reducer(state: RunUiState, evt: RunUiEvent): RunUiState {
       ...state,
       status: 'done',
       terminalStatus: e.status,
-      finalScore: e.score,
+      finalScore: e.score as ScoreBreakdown | null,
       tokensUsed: e.tokensUsed,
       msUsed: e.msUsed,
     };

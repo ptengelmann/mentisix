@@ -1,7 +1,14 @@
-import { type Difficulty, type WorldState, score as scoreTreasureHunt } from '@mentisix/sim';
+import {
+  type Difficulty,
+  type ProbeState,
+  type WorldState,
+  scoreProbe,
+  score as scoreTreasureHunt,
+} from '@mentisix/sim';
 import type { ChallengeSlug, ModelRef, RunEvent, RunOptions, RunStatus } from '@mentisix/types';
 import { Injectable, Logger } from '@nestjs/common';
 import { getChallenge } from '../challenges/registry.js';
+import { getResponseSchema } from '../challenges/schemas.js';
 import type { ModelProvider } from './providers/index.js';
 
 const DEFAULT_MAX_TOKENS = 200_000;
@@ -33,12 +40,10 @@ export class HarnessService {
   private readonly logger = new Logger(HarnessService.name);
 
   /**
-   * Drive a model through a Treasure Hunt run. Emits a stream of events
-   * via `ctx.emit`; resolves with the terminal status when the run ends.
-   *
-   * Stops on: world terminal (won/lost), step limit, token budget, wall
-   * clock, or LLM error. Any caught error becomes a 'killed' run with the
-   * message attached.
+   * Drive a model through a challenge run. Emits a stream of events via
+   * `ctx.emit`; resolves with the terminal status when the run ends.
+   * Stops on: state terminal, step limit, token budget, wall clock, or
+   * LLM error.
    */
   async run(ctx: RunContext): Promise<RunFinish> {
     const startedAt = Date.now();
@@ -46,31 +51,22 @@ export class HarnessService {
     const maxWallClockMs = ctx.options.maxWallClockMs ?? DEFAULT_MAX_WALLCLOCK_MS;
 
     const challenge = getChallenge(ctx.challenge);
-    let world = challenge.init(ctx.seed, ctx.difficulty) as WorldState;
-    if (ctx.options.maxSteps) {
-      // Step-budget override applies only to the world config — the rest
+    const responseSchema = getResponseSchema(ctx.challenge);
+
+    let state = challenge.init(ctx.seed, ctx.difficulty);
+    if (ctx.options.maxSteps && ctx.challenge === 'treasure-hunt') {
+      // Step-budget override applies only to the world config; the rest
       // of the procedurally generated world stays identical to the seed.
-      world = { ...world, config: { ...world.config, maxSteps: ctx.options.maxSteps } };
+      const w = state as WorldState;
+      state = { ...w, config: { ...w.config, maxSteps: ctx.options.maxSteps } } as typeof state;
     }
 
-    ctx.emit({
-      kind: 'hello',
-      runId: ctx.runId,
-      seed: ctx.seed,
-      initialWorld: {
-        seed: world.seed,
-        width: world.config.width,
-        height: world.config.height,
-        maxSteps: world.config.maxSteps,
-        visionRadius: world.config.visionRadius,
-        agent: world.agent,
-        grid: world.grid,
-      },
-    });
+    // Hello event is challenge-specific.
+    this.emitHello(ctx, state);
 
     let tokensUsed = 0;
 
-    while (world.status === 'running') {
+    while (!challenge.isTerminal(state)) {
       if (Date.now() - startedAt > maxWallClockMs) {
         ctx.emit({ kind: 'error', message: 'wall-clock budget exhausted' });
         return finish('killed', 'wall-clock budget exhausted');
@@ -80,8 +76,9 @@ export class HarnessService {
         return finish('killed', 'token budget exhausted');
       }
 
-      const obs = challenge.observe(world);
-      ctx.emit({ kind: 'observation', step: world.step, observation: obs });
+      const stepNum = challenge.stepsUsed(state);
+      const obs = challenge.observe(state);
+      ctx.emit({ kind: 'observation', step: stepNum, observation: obs });
 
       const thinkStart = Date.now();
       let resp: Awaited<ReturnType<ModelProvider['generate']>>;
@@ -90,13 +87,14 @@ export class HarnessService {
           apiKey: ctx.apiKey,
           model: ctx.model.model,
           system: challenge.systemPrompt(ctx.difficulty),
-          user: challenge.serializeObservation(obs, world),
+          user: challenge.serializeObservation(obs, state),
           observation: obs,
           runId: ctx.runId,
+          responseSchema,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(`provider failure on step ${world.step}: ${message}`);
+        this.logger.warn(`provider failure on step ${stepNum}: ${message}`);
         ctx.emit({ kind: 'error', message: `provider: ${message}` });
         return finish('error', message);
       }
@@ -105,48 +103,28 @@ export class HarnessService {
       const thinkMs = Date.now() - thinkStart;
       ctx.emit({
         kind: 'thinking',
-        step: world.step,
+        step: stepNum,
         reasoning: resp.response.reasoning,
         tokensUsed: resp.tokensUsed,
         msUsed: thinkMs,
       });
 
-      const prevWorld = world;
-      world = challenge.step(world, resp.response) as WorldState;
-      const result = world.history.at(-1);
-      if (result && world !== prevWorld) {
-        ctx.emit({
-          kind: 'action',
-          step: world.step,
-          action: result.action,
-          outcome: result.outcome,
-        });
-      }
-      ctx.emit({
-        kind: 'state',
-        step: world.step,
-        agent: world.agent,
-        inventory: world.inventory,
-        treasuresCollected: world.treasuresCollected,
-        status: world.status,
-      });
+      const prevState = state;
+      state = challenge.step(state, resp.response);
 
-      if (ctx.options.stepDelayMs && world.status === 'running') {
+      this.emitActionAndState(ctx, state, prevState, resp.response);
+
+      if (ctx.options.stepDelayMs && !challenge.isTerminal(state)) {
         await new Promise<void>((resolve) => setTimeout(resolve, ctx.options.stepDelayMs));
       }
     }
 
-    // Wire-level score for the harness (cross-challenge contract).
-    const finalScore = challenge.score(world);
+    const finalScore = challenge.score(state);
     const status: RunStatus = finalScore.won ? 'passed' : 'failed';
-    // Rich breakdown for the live event (Treasure-Hunt-specific shape;
-    // when Memory Probe lands, the done event will become discriminated
-    // by challenge slug).
-    const treasureBreakdown = scoreTreasureHunt(world);
     ctx.emit({
       kind: 'done',
       status,
-      score: treasureBreakdown,
+      score: this.scoreBreakdownFor(ctx.challenge, state),
       tokensUsed,
       msUsed: Date.now() - startedAt,
     });
@@ -156,7 +134,7 @@ export class HarnessService {
       finalScore: finalScore.score,
       tokensUsed,
       msUsed: Date.now() - startedAt,
-      stepsUsed: world.step,
+      stepsUsed: challenge.stepsUsed(state),
     };
 
     function finish(killStatus: RunStatus, message: string): RunFinish {
@@ -165,9 +143,97 @@ export class HarnessService {
         finalScore: 0,
         tokensUsed,
         msUsed: Date.now() - startedAt,
-        stepsUsed: world.step,
+        stepsUsed: challenge.stepsUsed(state),
         error: message,
       };
     }
+  }
+
+  private emitHello(ctx: RunContext, state: unknown): void {
+    if (ctx.challenge === 'treasure-hunt') {
+      const w = state as WorldState;
+      ctx.emit({
+        kind: 'hello',
+        runId: ctx.runId,
+        seed: ctx.seed,
+        initialWorld: {
+          seed: w.seed,
+          width: w.config.width,
+          height: w.config.height,
+          maxSteps: w.config.maxSteps,
+          visionRadius: w.config.visionRadius,
+          agent: w.agent,
+          grid: w.grid,
+        },
+      });
+      return;
+    }
+    if (ctx.challenge === 'memory-probe') {
+      const p = state as ProbeState;
+      ctx.emit({
+        kind: 'mp_hello',
+        runId: ctx.runId,
+        seed: ctx.seed,
+        maxTurns: p.maxTurns,
+        factCount: p.config.facts,
+      });
+    }
+  }
+
+  private emitActionAndState(
+    ctx: RunContext,
+    state: unknown,
+    prevState: unknown,
+    response: { reasoning: string; [k: string]: unknown },
+  ): void {
+    if (ctx.challenge === 'treasure-hunt') {
+      const w = state as WorldState;
+      const prev = prevState as WorldState;
+      const result = w.history.at(-1);
+      if (result && w !== prev) {
+        ctx.emit({
+          kind: 'action',
+          step: w.step,
+          action: result.action,
+          outcome: result.outcome,
+        });
+      }
+      ctx.emit({
+        kind: 'state',
+        step: w.step,
+        agent: w.agent,
+        inventory: w.inventory,
+        treasuresCollected: w.treasuresCollected,
+        status: w.status,
+      });
+      return;
+    }
+    if (ctx.challenge === 'memory-probe') {
+      const p = state as ProbeState;
+      const prev = prevState as ProbeState;
+      const justAnswered = p.answers.length > prev.answers.length ? p.answers.at(-1) : undefined;
+      const answer = typeof response.answer === 'string' ? response.answer : '';
+      ctx.emit({
+        kind: 'mp_action',
+        step: p.turn,
+        answer,
+        ...(justAnswered ? { expected: justAnswered.expected, correct: justAnswered.correct } : {}),
+      });
+      ctx.emit({
+        kind: 'mp_state',
+        step: p.turn,
+        turn: p.turn,
+        factsRevealed: p.schedule.slice(0, p.turn).filter((t) => t.kind === 'tell').length,
+        answersGiven: p.answers.length,
+        answersCorrect: p.answers.filter((a) => a.correct).length,
+        status: p.status,
+      });
+    }
+  }
+
+  private scoreBreakdownFor(challenge: ChallengeSlug, state: unknown): unknown {
+    if (challenge === 'treasure-hunt') return scoreTreasureHunt(state as WorldState);
+    if (challenge === 'memory-probe') return scoreProbe(state as ProbeState);
+    return null;
   }
 }

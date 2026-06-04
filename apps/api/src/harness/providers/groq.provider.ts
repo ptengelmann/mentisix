@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
 /**
@@ -13,7 +12,7 @@ import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.in
 export class GroqProvider implements ModelProvider {
   readonly id = 'groq' as const;
 
-  async generate(input: GenerateInput): Promise<GenerateOutput> {
+  async generate<T = unknown>(input: GenerateInput): Promise<GenerateOutput<T>> {
     const client = new OpenAI({
       apiKey: input.apiKey,
       baseURL: 'https://api.groq.com/openai/v1',
@@ -31,7 +30,9 @@ export class GroqProvider implements ModelProvider {
     const content = completion.choices[0]?.message.content;
     if (!content) throw new Error('groq: empty completion content');
 
-    const parsed = AgentResponseSchema.parse(JSON.parse(content));
+    const parsed = input.responseSchema.zod.parse(JSON.parse(content)) as T & {
+      reasoning: string;
+    };
     return {
       response: parsed,
       tokensUsed: completion.usage?.total_tokens ?? 0,

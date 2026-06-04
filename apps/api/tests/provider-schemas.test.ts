@@ -1,41 +1,36 @@
 import { describe, expect, it } from 'vitest';
-import { ANTHROPIC_TOOL_INPUT_SCHEMA } from '../src/harness/providers/anthropic.provider.js';
-import { OPENAI_STRUCTURED_SCHEMA } from '../src/harness/providers/openai.provider.js';
+import { getResponseSchema } from '../src/challenges/schemas.js';
 
 /**
- * Both providers send a JSON Schema describing the agent's structured
- * output. OpenAI strict mode and Anthropic tool_use both require the
- * root to be an inline `type: "object"` schema, not a `{ $ref,
- * definitions }` wrapper. Passing `name` to zod-to-json-schema produces
- * the wrapper — we caught this on the first real call against OpenAI
- * (400 "schema must be a JSON Schema of 'type: object'"). This test
- * guards against the regression.
+ * Every challenge's response schema must satisfy provider strict-mode
+ * requirements: root `type: "object"`, all keys required, no
+ * `$schema` / `$ref` / `definitions` envelope. Caught on the first
+ * real OpenAI call back in PR #11; the regression test stays.
  */
-describe('provider structured-output schemas', () => {
-  it('OpenAI schema is a root object with required properties', () => {
-    expect(OPENAI_STRUCTURED_SCHEMA.type).toBe('object');
-    const properties = OPENAI_STRUCTURED_SCHEMA.properties as Record<string, unknown>;
-    expect(properties).toHaveProperty('reasoning');
-    expect(properties).toHaveProperty('action');
-    expect(OPENAI_STRUCTURED_SCHEMA.required).toEqual(
-      expect.arrayContaining(['reasoning', 'action']),
-    );
-    // strict mode requires additionalProperties false on every object node
-    expect(OPENAI_STRUCTURED_SCHEMA.additionalProperties).toBe(false);
-    // strict mode also rejects $ref / definitions / $schema metadata at root
-    expect(OPENAI_STRUCTURED_SCHEMA).not.toHaveProperty('$ref');
-    expect(OPENAI_STRUCTURED_SCHEMA).not.toHaveProperty('definitions');
-    expect(OPENAI_STRUCTURED_SCHEMA).not.toHaveProperty('$schema');
+describe('per-challenge response schemas', () => {
+  it.each(['treasure-hunt', 'memory-probe'] as const)('%s schema is strict-mode safe', (id) => {
+    const { jsonSchema } = getResponseSchema(id);
+    expect(jsonSchema.type).toBe('object');
+    expect(jsonSchema.additionalProperties).toBe(false);
+    const props = jsonSchema.properties as Record<string, unknown>;
+    expect(props).toHaveProperty('reasoning');
+    expect(jsonSchema.required).toEqual(expect.arrayContaining(Object.keys(props)));
+    expect(jsonSchema).not.toHaveProperty('$ref');
+    expect(jsonSchema).not.toHaveProperty('definitions');
+    expect(jsonSchema).not.toHaveProperty('$schema');
   });
 
-  it('Anthropic tool input schema is a root object with required properties', () => {
-    const schema = ANTHROPIC_TOOL_INPUT_SCHEMA as Record<string, unknown>;
-    expect(schema.type).toBe('object');
-    expect(schema.properties).toMatchObject({
-      reasoning: expect.anything(),
-      action: expect.anything(),
-    });
-    expect(schema).not.toHaveProperty('$ref');
-    expect(schema).not.toHaveProperty('$schema');
+  it('Treasure Hunt schema includes flat action enum', () => {
+    const { jsonSchema } = getResponseSchema('treasure-hunt');
+    const props = jsonSchema.properties as Record<string, Record<string, unknown>>;
+    expect(props.action?.type).toBe('string');
+    expect(Array.isArray(props.action?.enum)).toBe(true);
+  });
+
+  it('Memory Probe schema asks for a free-form answer string', () => {
+    const { jsonSchema } = getResponseSchema('memory-probe');
+    const props = jsonSchema.properties as Record<string, Record<string, unknown>>;
+    expect(props.answer?.type).toBe('string');
+    expect(props.answer?.enum).toBeUndefined();
   });
 });
