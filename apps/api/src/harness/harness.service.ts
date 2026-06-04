@@ -1,16 +1,7 @@
-import {
-  CONFIG_BY_DIFFICULTY,
-  type Difficulty,
-  type WorldState,
-  createWorld,
-  observe,
-  score,
-  step,
-} from '@mentisix/sim';
-import type { ModelRef, RunEvent, RunOptions, RunStatus } from '@mentisix/types';
+import { type Difficulty, type WorldState, score as scoreTreasureHunt } from '@mentisix/sim';
+import type { ChallengeSlug, ModelRef, RunEvent, RunOptions, RunStatus } from '@mentisix/types';
 import { Injectable, Logger } from '@nestjs/common';
-import { tokenToAction } from './action.schema.js';
-import { SYSTEM_PROMPT, serializeObservation } from './prompts.js';
+import { getChallenge } from '../challenges/registry.js';
 import type { ModelProvider } from './providers/index.js';
 
 const DEFAULT_MAX_TOKENS = 200_000;
@@ -18,6 +9,7 @@ const DEFAULT_MAX_WALLCLOCK_MS = 5 * 60_000;
 
 export type RunContext = {
   runId: string;
+  challenge: ChallengeSlug;
   seed: number;
   difficulty: Difficulty;
   model: ModelRef;
@@ -53,11 +45,13 @@ export class HarnessService {
     const maxTokens = ctx.options.maxTokens ?? DEFAULT_MAX_TOKENS;
     const maxWallClockMs = ctx.options.maxWallClockMs ?? DEFAULT_MAX_WALLCLOCK_MS;
 
-    const tierConfig = CONFIG_BY_DIFFICULTY[ctx.difficulty];
-    let world: WorldState = createWorld(ctx.seed, {
-      ...tierConfig,
-      ...(ctx.options.maxSteps ? { maxSteps: ctx.options.maxSteps } : {}),
-    });
+    const challenge = getChallenge(ctx.challenge);
+    let world = challenge.init(ctx.seed, ctx.difficulty) as WorldState;
+    if (ctx.options.maxSteps) {
+      // Step-budget override applies only to the world config — the rest
+      // of the procedurally generated world stays identical to the seed.
+      world = { ...world, config: { ...world.config, maxSteps: ctx.options.maxSteps } };
+    }
 
     ctx.emit({
       kind: 'hello',
@@ -86,7 +80,7 @@ export class HarnessService {
         return finish('killed', 'token budget exhausted');
       }
 
-      const obs = observe(world);
+      const obs = challenge.observe(world);
       ctx.emit({ kind: 'observation', step: world.step, observation: obs });
 
       const thinkStart = Date.now();
@@ -95,8 +89,8 @@ export class HarnessService {
         resp = await ctx.provider.generate({
           apiKey: ctx.apiKey,
           model: ctx.model.model,
-          system: SYSTEM_PROMPT,
-          user: serializeObservation(obs),
+          system: challenge.systemPrompt(ctx.difficulty),
+          user: challenge.serializeObservation(obs, world),
           observation: obs,
           runId: ctx.runId,
         });
@@ -117,10 +111,10 @@ export class HarnessService {
         msUsed: thinkMs,
       });
 
-      const simAction = tokenToAction(resp.response.action);
-      world = step(world, simAction);
+      const prevWorld = world;
+      world = challenge.step(world, resp.response) as WorldState;
       const result = world.history.at(-1);
-      if (result) {
+      if (result && world !== prevWorld) {
         ctx.emit({
           kind: 'action',
           step: world.step,
@@ -142,19 +136,24 @@ export class HarnessService {
       }
     }
 
-    const breakdown = score(world);
-    const status: RunStatus = world.status === 'won' ? 'passed' : 'failed';
+    // Wire-level score for the harness (cross-challenge contract).
+    const finalScore = challenge.score(world);
+    const status: RunStatus = finalScore.won ? 'passed' : 'failed';
+    // Rich breakdown for the live event (Treasure-Hunt-specific shape;
+    // when Memory Probe lands, the done event will become discriminated
+    // by challenge slug).
+    const treasureBreakdown = scoreTreasureHunt(world);
     ctx.emit({
       kind: 'done',
       status,
-      score: breakdown,
+      score: treasureBreakdown,
       tokensUsed,
       msUsed: Date.now() - startedAt,
     });
 
     return {
       status,
-      finalScore: breakdown.score,
+      finalScore: finalScore.score,
       tokensUsed,
       msUsed: Date.now() - startedAt,
       stepsUsed: world.step,

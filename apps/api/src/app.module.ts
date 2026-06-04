@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ChallengesModule } from './challenges/challenges.module.js';
 import { DatasetsModule } from './datasets/datasets.module.js';
 import { DbModule } from './db/db.module.js';
 import { HealthModule } from './health/health.module.js';
@@ -17,6 +18,7 @@ import { RunsModule } from './runs/runs.module.js';
     RunsModule,
     LeaderboardModule,
     DatasetsModule,
+    ChallengesModule,
   ],
 })
 export class AppModule {}
