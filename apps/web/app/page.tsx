@@ -553,9 +553,20 @@ function Footer() {
           }}
         >
           <span>© 2026 Mentisix</span>
-          <Link href="/dojo" className="mx-navlink">
-            Enter the dojo →
-          </Link>
+          <div style={{ display: 'inline-flex', gap: 22, flexWrap: 'wrap' }}>
+            <Link href="/about" className="mx-navlink">
+              About
+            </Link>
+            <Link href="/methodology" className="mx-navlink">
+              Methodology
+            </Link>
+            <Link href="/dataset" className="mx-navlink">
+              Dataset
+            </Link>
+            <Link href="/dojo" className="mx-navlink">
+              Enter the dojo →
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
