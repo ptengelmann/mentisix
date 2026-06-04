@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { DemoLoop } from '../components/DemoLoop';
 import { HomeLeaderboardPeek } from '../components/HomeLeaderboardPeek';
 import { Nav } from '../components/Nav';
+import { SupportedModels } from '../components/SupportedModels';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -40,6 +41,7 @@ export default function HomePage() {
 
       <main style={{ position: 'relative', zIndex: 1 }}>
         <Hero />
+        <SupportedModels />
         <Manifesto />
         <Definitions />
         <BoardSection />
