@@ -560,6 +560,9 @@ function Footer() {
             <Link href="/methodology" className="mx-navlink">
               Methodology
             </Link>
+            <Link href="/findings" className="mx-navlink">
+              Findings
+            </Link>
             <Link href="/dataset" className="mx-navlink">
               Dataset
             </Link>
