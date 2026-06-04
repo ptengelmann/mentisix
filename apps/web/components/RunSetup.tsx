@@ -379,7 +379,7 @@ function SectionHeader({
             fontSize: 11,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: 'var(--mx-fog-dim)',
+            color: interactive ? 'var(--mx-signal)' : 'var(--mx-fog-dim)',
             marginLeft: 'auto',
           }}
         >
@@ -391,8 +391,8 @@ function SectionHeader({
           aria-hidden="true"
           style={{
             fontFamily: 'var(--mx-font-mono)',
-            fontSize: 12,
-            color: 'var(--mx-fog)',
+            fontSize: 14,
+            color: 'var(--mx-signal)',
             marginLeft: 8,
             transition: 'transform var(--mx-dur) var(--mx-ease)',
             display: 'inline-block',
