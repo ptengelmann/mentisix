@@ -22,6 +22,7 @@ type RunRecord = {
   handle: string | null;
   error?: string;
   events$: ReplaySubject<RunEvent>;
+  eventLog: RunEvent[];
 };
 
 const SEED_MAX = 2_147_483_647;
@@ -56,6 +57,7 @@ export class RunsService {
       finishedAt: null,
       handle: dto.handle ?? null,
       events$,
+      eventLog: [],
     };
     this.runs.set(id, record);
 
@@ -72,6 +74,10 @@ export class RunsService {
     options: RunStartDto['options'],
   ): Promise<void> {
     record.status = 'running';
+    const emit = (event: RunEvent) => {
+      record.eventLog.push(event);
+      record.events$.next(event);
+    };
     try {
       const provider = this.providers.for(record.model.provider);
       const finish = await this.harness.run({
@@ -81,7 +87,7 @@ export class RunsService {
         apiKey,
         options: options ?? {},
         provider,
-        emit: (event) => record.events$.next(event),
+        emit,
       });
       record.status = finish.status;
       record.score = finish.finalScore;
@@ -94,7 +100,7 @@ export class RunsService {
       this.logger.error(`run ${record.id} crashed: ${message}`);
       record.status = 'error';
       record.error = message;
-      record.events$.next({ kind: 'error', message });
+      emit({ kind: 'error', message });
     } finally {
       record.finishedAt = new Date().toISOString();
       record.events$.complete();
@@ -114,6 +120,7 @@ export class RunsService {
           finishedAt: record.finishedAt ? new Date(record.finishedAt) : null,
           error: record.error ?? null,
           handle: record.handle,
+          events: record.eventLog,
         });
       } catch (err) {
         this.logger.error(
@@ -147,5 +154,9 @@ export class RunsService {
     const r = this.runs.get(id);
     if (!r) throw new NotFoundException(`run ${id} not found`);
     return r.events$.asObservable();
+  }
+
+  getReplay(id: string) {
+    return this.repo.findReplay(id);
   }
 }

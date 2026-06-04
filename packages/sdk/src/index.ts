@@ -59,6 +59,12 @@ export class MentisixClient {
     return res.json() as Promise<RunSummary>;
   }
 
+  async getReplay(id: string): Promise<RunReplay> {
+    const res = await this.#fetch(`${this.baseUrl}/runs/${encodeURIComponent(id)}/replay`);
+    if (!res.ok) throw new Error(`mentisix: getReplay ${res.status}`);
+    return res.json() as Promise<RunReplay>;
+  }
+
   /**
    * Open an SSE stream for a run. Yields parsed `RunEvent` objects as they
    * arrive. Use in an `async for` loop. Caller is responsible for breaking
@@ -116,6 +122,11 @@ function parseFrame(frame: string): unknown | null {
     return null;
   }
 }
+
+export type RunReplay = {
+  summary: RunSummary;
+  events: RunEvent[];
+};
 
 export type {
   LeaderboardRow,
