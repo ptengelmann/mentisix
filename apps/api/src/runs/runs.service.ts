@@ -85,6 +85,7 @@ export class RunsService {
       const provider = this.providers.for(record.model.provider);
       const finish = await this.harness.run({
         runId: record.id,
+        challenge: record.challenge,
         seed: record.seed,
         difficulty: record.difficulty,
         model: record.model,

@@ -13,6 +13,7 @@ describe('SolverProvider', () => {
       const finish = await service.run({
         runId: `solver-seed-${seed}`,
         seed,
+        challenge: 'treasure-hunt',
         difficulty: 'medium',
         model: { provider: 'solver', model: 'solver-1' },
         apiKey: 'unused',
@@ -42,6 +43,7 @@ describe('SolverProvider', () => {
     const finish = await service.run({
       runId: 'solver-events',
       seed: 0,
+      challenge: 'treasure-hunt',
       difficulty: 'medium',
       model: { provider: 'solver', model: 'solver-1' },
       apiKey: 'unused',
@@ -66,6 +68,7 @@ describe('SolverProvider', () => {
     const finish = await service.run({
       runId: 'solver-quick',
       seed: 3,
+      challenge: 'treasure-hunt',
       difficulty: 'medium',
       model: { provider: 'solver', model: 'solver-1' },
       apiKey: 'unused',

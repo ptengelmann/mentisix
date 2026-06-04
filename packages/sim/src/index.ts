@@ -34,5 +34,14 @@ export { createWorld, type CreateWorldOptions } from './procgen/index.js';
 export { isSolvable } from './procgen/solver.js';
 export { distanceMap, generateLayout } from './procgen/layout.js';
 
+export type {
+  Challenge,
+  ChallengeId,
+  ChallengeManifest,
+  ChallengeScore,
+  ChallengeStatus,
+  DifficultyManifest,
+} from './challenge.js';
+
 export const SIM_VERSION = '0.1.0';
 export const SUPPORTED_CHALLENGES = ['treasure-hunt'] as const;
