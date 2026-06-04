@@ -160,15 +160,46 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
         />
       </Field>
 
-      <Field label="Seed" hint="Leave blank for random">
-        <Input
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={seed}
-          onChange={(e) => setSeed(e.target.value.replace(/[^0-9]/g, ''))}
-          placeholder="random"
-          autoComplete="off"
-        />
+      <Field label="Seed" hint="Leave blank for random · or roll one">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <Input
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={seed}
+              onChange={(e) => setSeed(e.target.value.replace(/[^0-9]/g, ''))}
+              placeholder="random"
+              autoComplete="off"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setSeed(String(Math.floor(Math.random() * 2_147_483_647)))}
+            aria-label="Roll random seed"
+            style={{
+              width: 44,
+              background: 'var(--mx-void)',
+              border: '1px solid var(--mx-line)',
+              color: 'var(--mx-fog)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition:
+                'color var(--mx-dur) var(--mx-ease), border-color var(--mx-dur) var(--mx-ease)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--mx-signal)';
+              e.currentTarget.style.borderColor = 'var(--mx-signal-dim)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--mx-fog)';
+              e.currentTarget.style.borderColor = 'var(--mx-line)';
+            }}
+          >
+            <DiceIcon />
+          </button>
+        </div>
       </Field>
 
       <Field label="Handle" hint="Optional · a-z, 0-9, _ · 16 chars max · shown on the board">
@@ -265,4 +296,28 @@ function Field({
 
 function defaultFor(p: ProviderId): string {
   return PROVIDERS.find((x) => x.id === p)?.defaultModel ?? 'mock-1';
+}
+
+function DiceIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      aria-hidden="true"
+    >
+      <title>Roll</title>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" />
+      <circle cx="8" cy="8" r="1" fill="currentColor" />
+      <circle cx="16" cy="8" r="1" fill="currentColor" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+      <circle cx="8" cy="16" r="1" fill="currentColor" />
+      <circle cx="16" cy="16" r="1" fill="currentColor" />
+    </svg>
+  );
 }

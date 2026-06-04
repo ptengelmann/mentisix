@@ -13,12 +13,14 @@ import { StatsReadout } from './StatsReadout';
 
 export function RunViewer() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [lastReq, setLastReq] = useState<RunStartRequest | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const start = useCallback(async (req: RunStartRequest) => {
     if (abortRef.current) abortRef.current.abort();
     const abort = new AbortController();
     abortRef.current = abort;
+    setLastReq(req);
 
     try {
       const { runId, seed } = await client.startRun(req);
@@ -38,6 +40,7 @@ export function RunViewer() {
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    setLastReq(null);
     dispatch({ kind: 'reset' });
   }, []);
 
@@ -70,7 +73,7 @@ export function RunViewer() {
       >
         <div>
           <Kicker index={state.seed != null ? String(state.seed % 100).padStart(2, '0') : '00'}>
-            Run · seed {state.seed ?? '—'}
+            Run
           </Kicker>
           <h2
             style={{
@@ -83,7 +86,8 @@ export function RunViewer() {
             {titleFor(state.status, state.terminalStatus)}
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          {state.seed != null ? <SeedChip seed={state.seed} /> : null}
           <StatusTag status={state.status} />
           <Button onClick={reset}>New run</Button>
         </div>
@@ -136,7 +140,16 @@ export function RunViewer() {
         />
       ) : null}
 
-      {state.status === 'done' && state.runId ? <ShareCard runId={state.runId} /> : null}
+      {state.status === 'done' && state.runId && state.seed != null ? (
+        <ShareCard
+          runId={state.runId}
+          seed={state.seed}
+          modelName={lastReq?.model.model ?? null}
+          handle={lastReq?.handle ?? null}
+          terminal={state.terminalStatus}
+          score={state.finalScore?.score ?? null}
+        />
+      ) : null}
 
       {state.error ? (
         <div
@@ -220,7 +233,61 @@ function FinalCard({
   );
 }
 
-function ShareCard({ runId }: { runId: string }) {
+function SeedChip({ seed }: { seed: number }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(String(seed));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={`Copy seed ${seed}`}
+      style={{
+        background: 'var(--mx-void)',
+        border: '1px solid var(--mx-line)',
+        padding: '6px 12px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        fontFamily: 'var(--mx-font-mono)',
+        fontSize: 11,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: copied ? 'var(--mx-signal)' : 'var(--mx-fog)',
+        cursor: 'pointer',
+        transition: 'color var(--mx-dur) var(--mx-ease)',
+      }}
+    >
+      <span>seed {seed}</span>
+      <span style={{ color: copied ? 'var(--mx-signal)' : 'var(--mx-fog-dim)' }}>
+        {copied ? 'copied' : 'copy'}
+      </span>
+    </button>
+  );
+}
+
+function ShareCard({
+  runId,
+  seed,
+  modelName,
+  handle,
+  terminal,
+  score,
+}: {
+  runId: string;
+  seed: number;
+  modelName: string | null;
+  handle: string | null;
+  terminal: RunUiState['terminalStatus'];
+  score: number | null;
+}) {
   const [copied, setCopied] = useState(false);
   const url =
     typeof window === 'undefined' ? `/runs/${runId}` : `${window.location.origin}/runs/${runId}`;
@@ -234,6 +301,9 @@ function ShareCard({ runId }: { runId: string }) {
       // ignore — fall back to manual copy from the input
     }
   };
+
+  const tweetText = buildTweetText({ seed, modelName, handle, terminal, score });
+  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
 
   return (
     <Card title="Share this run">
@@ -264,15 +334,42 @@ function ShareCard({ runId }: { runId: string }) {
         >
           {url}
         </code>
-        <Button onClick={copy} variant="signal" dot>
-          {copied ? 'Copied' : 'Copy link'}
-        </Button>
+        <a href={tweetUrl} target="_blank" rel="noopener noreferrer">
+          <Button variant="signal" dot>
+            Post to X
+          </Button>
+        </a>
+        <Button onClick={copy}>{copied ? 'Copied' : 'Copy link'}</Button>
         <Link href={`/runs/${runId}`}>
           <Button>Open replay</Button>
         </Link>
       </div>
     </Card>
   );
+}
+
+function buildTweetText({
+  seed,
+  modelName,
+  handle,
+  terminal,
+  score,
+}: {
+  seed: number;
+  modelName: string | null;
+  handle: string | null;
+  terminal: RunUiState['terminalStatus'];
+  score: number | null;
+}): string {
+  const model = modelName ?? 'an LLM';
+  const who = handle ? `@${handle} · ` : '';
+  if (terminal === 'passed') {
+    return `${who}${model} cleared Mentisix Treasure Hunt · seed ${seed} · score ${score ?? '—'}`;
+  }
+  if (terminal === 'failed') {
+    return `${who}I watched ${model} fail Mentisix Treasure Hunt · seed ${seed} · score ${score ?? 0}`;
+  }
+  return `${who}${model} on Mentisix Treasure Hunt · seed ${seed}`;
 }
 
 function FinalStat({
