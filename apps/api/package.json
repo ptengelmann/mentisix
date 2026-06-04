@@ -13,6 +13,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:push": "drizzle-kit push",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
@@ -23,7 +26,10 @@
     "@nestjs/config": "4.0.0",
     "@nestjs/core": "11.0.1",
     "@nestjs/platform-express": "11.0.1",
+    "dotenv": "16.4.7",
+    "drizzle-orm": "0.38.3",
     "openai": "4.77.0",
+    "postgres": "3.4.5",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
     "zod": "3.24.1",
@@ -37,7 +43,9 @@
     "@types/express": "5.0.0",
     "@types/node": "22.10.2",
     "@types/supertest": "6.0.2",
+    "drizzle-kit": "0.30.1",
     "supertest": "7.0.0",
+    "tsx": "4.19.2",
     "typescript": "5.7.2",
     "vitest": "2.1.8"
   }

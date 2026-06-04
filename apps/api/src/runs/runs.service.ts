@@ -5,6 +5,7 @@ import { type Observable, ReplaySubject } from 'rxjs';
 import { HarnessService } from '../harness/harness.service.js';
 import { ProviderFactory } from '../harness/providers/index.js';
 import type { RunStartDto } from './run.dto.js';
+import { RunsRepository } from './runs.repository.js';
 
 type RunRecord = {
   id: string;
@@ -32,6 +33,7 @@ export class RunsService {
   constructor(
     private readonly harness: HarnessService,
     private readonly providers: ProviderFactory,
+    private readonly repo: RunsRepository,
   ) {}
 
   startRun(dto: RunStartDto): { runId: string; seed: number } {
@@ -94,6 +96,27 @@ export class RunsService {
     } finally {
       record.finishedAt = new Date().toISOString();
       record.events$.complete();
+      try {
+        await this.repo.insertTerminal({
+          id: record.id,
+          challenge: record.challenge,
+          seed: record.seed,
+          provider: record.model.provider,
+          model: record.model.model,
+          status: record.status,
+          score: record.score,
+          stepsUsed: record.stepsUsed,
+          tokensUsed: record.tokensUsed,
+          msUsed: record.msUsed,
+          createdAt: new Date(record.createdAt),
+          finishedAt: record.finishedAt ? new Date(record.finishedAt) : null,
+          error: record.error ?? null,
+        });
+      } catch (err) {
+        this.logger.error(
+          `run ${record.id} persist failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
     }
   }
 
