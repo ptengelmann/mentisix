@@ -9,7 +9,9 @@ const PROVIDERS: { id: ProviderId; label: string; defaultModel: string; defaultD
   { id: 'solver', label: 'Solver', defaultModel: 'solver-1', defaultDelay: 220 },
   { id: 'anthropic', label: 'Claude', defaultModel: 'claude-sonnet-4-6', defaultDelay: 0 },
   { id: 'openai', label: 'OpenAI', defaultModel: 'gpt-4o', defaultDelay: 0 },
+  { id: 'gemini', label: 'Gemini', defaultModel: 'gemini-2.5-flash', defaultDelay: 0 },
   { id: 'groq', label: 'Groq', defaultModel: 'llama-3.3-70b-versatile', defaultDelay: 0 },
+  { id: 'openrouter', label: 'OpenRouter', defaultModel: 'x-ai/grok-3', defaultDelay: 0 },
   { id: 'mock', label: 'Mock', defaultModel: 'mock-1', defaultDelay: 100 },
 ];
 
@@ -126,7 +128,11 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          placeholder={provider === 'mock' || provider === 'solver' ? 'not required' : 'sk-…'}
+          placeholder={
+            provider === 'mock' || provider === 'solver'
+              ? 'not required'
+              : 'paste key · never stored'
+          }
           autoComplete="off"
           spellCheck={false}
         />

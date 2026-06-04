@@ -19,13 +19,31 @@ import type {
 export type ChallengeSlug = 'treasure-hunt';
 export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
 
-export type ProviderId = 'openai' | 'anthropic' | 'groq' | 'mock' | 'solver';
+export type ProviderId =
+  | 'openai'
+  | 'anthropic'
+  | 'gemini'
+  | 'groq'
+  | 'openrouter'
+  | 'mock'
+  | 'solver';
 export const PROVIDERS: readonly ProviderId[] = [
   'openai',
   'anthropic',
+  'gemini',
   'groq',
+  'openrouter',
   'mock',
   'solver',
+] as const;
+
+/** Provider IDs that exercise real LLM APIs (i.e. need a key). */
+export const LLM_PROVIDERS: readonly ProviderId[] = [
+  'openai',
+  'anthropic',
+  'gemini',
+  'groq',
+  'openrouter',
 ] as const;
 
 export type ModelRef = {
