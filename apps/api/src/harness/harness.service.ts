@@ -1,4 +1,12 @@
-import { type WorldState, createWorld, observe, score, step } from '@mentisix/sim';
+import {
+  CONFIG_BY_DIFFICULTY,
+  type Difficulty,
+  type WorldState,
+  createWorld,
+  observe,
+  score,
+  step,
+} from '@mentisix/sim';
 import type { ModelRef, RunEvent, RunOptions, RunStatus } from '@mentisix/types';
 import { Injectable, Logger } from '@nestjs/common';
 import { tokenToAction } from './action.schema.js';
@@ -11,6 +19,7 @@ const DEFAULT_MAX_WALLCLOCK_MS = 5 * 60_000;
 export type RunContext = {
   runId: string;
   seed: number;
+  difficulty: Difficulty;
   model: ModelRef;
   apiKey: string;
   options: RunOptions;
@@ -44,10 +53,11 @@ export class HarnessService {
     const maxTokens = ctx.options.maxTokens ?? DEFAULT_MAX_TOKENS;
     const maxWallClockMs = ctx.options.maxWallClockMs ?? DEFAULT_MAX_WALLCLOCK_MS;
 
-    let world: WorldState = createWorld(
-      ctx.seed,
-      ctx.options.maxSteps ? { maxSteps: ctx.options.maxSteps } : undefined,
-    );
+    const tierConfig = CONFIG_BY_DIFFICULTY[ctx.difficulty];
+    let world: WorldState = createWorld(ctx.seed, {
+      ...tierConfig,
+      ...(ctx.options.maxSteps ? { maxSteps: ctx.options.maxSteps } : {}),
+    });
 
     ctx.emit({
       kind: 'hello',

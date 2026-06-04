@@ -1,11 +1,26 @@
 'use client';
 
-import { HANDLE_PATTERN, type ProviderId, type RunStartRequest } from '@mentisix/types';
+import {
+  type Difficulty,
+  HANDLE_PATTERN,
+  type ProviderId,
+  type RunStartRequest,
+} from '@mentisix/types';
 import { Button, Input, Kicker } from '@mentisix/ui';
 import { useEffect, useState } from 'react';
 import { ProviderLogo } from './ProviderLogo';
 
 const HANDLE_STORAGE_KEY = 'mx.handle';
+
+const DIFFICULTY_OPTIONS: {
+  id: Difficulty;
+  label: string;
+  description: string;
+}[] = [
+  { id: 'easy', label: 'Easy', description: '10×10 · 1 treasure · 5×5 vision' },
+  { id: 'medium', label: 'Medium', description: '12×12 · 3 treasures · keys + doors' },
+  { id: 'hard', label: 'Hard', description: '16×16 · 5 treasures · 300 steps' },
+];
 
 const PROVIDERS: { id: ProviderId; label: string; defaultModel: string; defaultDelay: number }[] = [
   { id: 'solver', label: 'Solver', defaultModel: 'solver-1', defaultDelay: 220 },
@@ -36,6 +51,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
   const [seed, setSeed] = useState('');
   const [stepDelayMs, setStepDelayMs] = useState(220);
   const [handle, setHandle] = useState('');
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
 
   useEffect(() => {
     try {
@@ -59,6 +75,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
     }
     const req: RunStartRequest = {
       challenge: 'treasure-hunt',
+      difficulty,
       model: { provider, model: model.trim() || defaultFor(provider) },
       apiKey: apiKey.trim() || 'mock-key',
       options: { stepDelayMs },
@@ -130,6 +147,61 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
             >
               <ProviderLogo provider={p.id} size={22} />
               <span style={{ lineHeight: 1.2 }}>{p.label}</span>
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="Difficulty" hint="Frozen world configs. Same seed gives the same world.">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${DIFFICULTY_OPTIONS.length}, 1fr)`,
+            gap: 1,
+            background: 'var(--mx-line-soft)',
+          }}
+        >
+          {DIFFICULTY_OPTIONS.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => setDifficulty(d.id)}
+              style={{
+                background: difficulty === d.id ? 'var(--mx-slate)' : 'var(--mx-void)',
+                border: 'none',
+                padding: '14px 10px 16px',
+                color: difficulty === d.id ? 'var(--mx-signal)' : 'var(--mx-fog)',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 6,
+                transition:
+                  'color var(--mx-dur) var(--mx-ease), background var(--mx-dur) var(--mx-ease)',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'var(--mx-font-mono)',
+                  fontSize: 11,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {d.label}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--mx-font-mono)',
+                  fontSize: 9.5,
+                  letterSpacing: '0.04em',
+                  color: 'var(--mx-fog-dim)',
+                  textAlign: 'center',
+                  lineHeight: 1.35,
+                }}
+              >
+                {d.description}
+              </span>
             </button>
           ))}
         </div>

@@ -1,8 +1,9 @@
-import { HANDLE_PATTERN, PROVIDERS } from '@mentisix/types';
+import { DIFFICULTIES, HANDLE_PATTERN, PROVIDERS } from '@mentisix/types';
 import { z } from 'zod';
 
 export const RunStartSchema = z.object({
   challenge: z.literal('treasure-hunt'),
+  difficulty: z.enum(DIFFICULTIES as readonly [string, ...string[]]).optional(),
   seed: z.number().int().nonnegative().optional(),
   model: z.object({
     provider: z.enum(PROVIDERS as readonly [string, ...string[]]),

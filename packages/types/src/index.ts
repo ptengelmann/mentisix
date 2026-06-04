@@ -9,12 +9,16 @@ import type {
   Action,
   ActionOutcome,
   Cell,
+  Difficulty,
   KeyColor,
   Observation,
   Position,
   ScoreBreakdown,
   WorldStatus,
 } from '@mentisix/sim';
+
+export type { Difficulty } from '@mentisix/sim';
+export const DIFFICULTIES = ['easy', 'medium', 'hard'] as const satisfies readonly Difficulty[];
 
 export type ChallengeSlug = 'treasure-hunt';
 export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
@@ -78,9 +82,11 @@ export const HANDLE_PATTERN = /^[a-z0-9_]{1,16}$/;
 
 export type RunStartRequest = {
   challenge: ChallengeSlug;
+  /** Difficulty tier within the challenge. Defaults to 'medium'. */
+  difficulty?: Difficulty;
   seed?: number;
   model: ModelRef;
-  /** User's API key — held in memory only, never persisted. */
+  /** User's API key. Held in memory only, never persisted. */
   apiKey: string;
   /** Optional display tag rendered on the leaderboard. */
   handle?: string;
@@ -96,6 +102,7 @@ export type RunStartResponse = {
 export type RunSummary = {
   id: string;
   challenge: ChallengeSlug;
+  difficulty: Difficulty;
   seed: number;
   model: ModelRef;
   status: RunStatus;
@@ -145,6 +152,7 @@ export type RunEvent =
 export type LeaderboardRow = {
   rank: number;
   model: ModelRef;
+  difficulty: Difficulty;
   bestScore: number;
   bestStepsUsed: number;
   runs: number;
@@ -161,6 +169,7 @@ export type LeaderboardRow = {
 export type DatasetRow = {
   id: string;
   challenge: ChallengeSlug;
+  difficulty: Difficulty;
   seed: number;
   provider: ProviderId;
   model: string;
@@ -179,6 +188,7 @@ export type DatasetRow = {
 export type DatasetStatsByModel = {
   provider: ProviderId;
   model: string;
+  difficulty: Difficulty;
   runs: number;
   passes: number;
   passRate: number;

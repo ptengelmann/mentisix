@@ -24,6 +24,7 @@ export const runs = pgTable(
     error: text('error'),
     handle: text('handle'),
     events: jsonb('events'),
+    difficulty: text('difficulty').notNull().default('medium'),
   },
   (t) => ({
     byChallengeStatusScore: index('runs_challenge_status_score_idx').on(

@@ -3,6 +3,7 @@ export type {
   ActionOutcome,
   ActionResult,
   Cell,
+  Difficulty,
   Direction,
   FogCell,
   KeyColor,
@@ -13,7 +14,13 @@ export type {
   WorldState,
   WorldStatus,
 } from './types.js';
-export { DEFAULT_CONFIG, DIRECTIONS, KEY_COLORS } from './types.js';
+export {
+  CONFIG_BY_DIFFICULTY,
+  DEFAULT_CONFIG,
+  DIFFICULTIES,
+  DIRECTIONS,
+  KEY_COLORS,
+} from './types.js';
 
 export { makeRng, type Rng } from './rng.js';
 export { manhattan, inBounds, step as stepDirection } from './geometry.js';
