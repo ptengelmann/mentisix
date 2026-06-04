@@ -12,6 +12,7 @@ describe('HarnessService with MockProvider', () => {
     const finish = await service.run({
       runId: 'test-run-1',
       seed: 0,
+      difficulty: 'medium',
       model: { provider: 'mock', model: 'mock-1' },
       apiKey: 'no-key-needed',
       options: { maxSteps: 60 },
@@ -47,6 +48,7 @@ describe('HarnessService with MockProvider', () => {
     const finish = await service.run({
       runId: 'test-run-2',
       seed: 7,
+      difficulty: 'medium',
       model: { provider: 'mock', model: 'mock-1' },
       apiKey: 'x',
       options: { maxSteps: 5 },
@@ -65,6 +67,7 @@ describe('HarnessService with MockProvider', () => {
     const finish = await service.run({
       runId: 'test-run-3',
       seed: 1,
+      difficulty: 'medium',
       model: { provider: 'mock', model: 'mock-1' },
       apiKey: 'x',
       options: { maxTokens: 13 },

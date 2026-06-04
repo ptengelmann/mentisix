@@ -1,4 +1,5 @@
-import type { LeaderboardRow } from '@mentisix/types';
+import type { Difficulty, LeaderboardRow } from '@mentisix/types';
+import { DIFFICULTIES } from '@mentisix/types';
 import { Card, Kicker, Tag } from '@mentisix/ui';
 import Link from 'next/link';
 import { Nav } from '../../components/Nav';
@@ -9,9 +10,12 @@ export const revalidate = 0;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
-async function fetchLeaderboard(): Promise<LeaderboardRow[]> {
+async function fetchLeaderboard(difficulty: Difficulty): Promise<LeaderboardRow[]> {
   try {
-    const res = await fetch(`${API_URL}/leaderboard/treasure-hunt`, { cache: 'no-store' });
+    const res = await fetch(
+      `${API_URL}/leaderboard/treasure-hunt?difficulty=${encodeURIComponent(difficulty)}`,
+      { cache: 'no-store' },
+    );
     if (!res.ok) return [];
     return (await res.json()) as LeaderboardRow[];
   } catch {
@@ -19,8 +23,29 @@ async function fetchLeaderboard(): Promise<LeaderboardRow[]> {
   }
 }
 
-export default async function LeaderboardPage() {
-  const rows = await fetchLeaderboard();
+const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
+};
+
+function parseDifficulty(raw: string | string[] | undefined): Difficulty {
+  if (typeof raw === 'string' && (DIFFICULTIES as readonly string[]).includes(raw)) {
+    return raw as Difficulty;
+  }
+  return 'medium';
+}
+
+type SearchParams = Promise<{ difficulty?: string | string[] }>;
+
+export default async function LeaderboardPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const difficulty = parseDifficulty(params.difficulty);
+  const rows = await fetchLeaderboard(difficulty);
 
   return (
     <>
@@ -60,9 +85,16 @@ export default async function LeaderboardPage() {
           </p>
         </div>
 
-        <Card title="All-time" meta={<Tag state="pass">{rows.length} entries</Tag>}>
-          {rows.length === 0 ? <EmptyState /> : <Table rows={rows} />}
-        </Card>
+        <DifficultyTabs current={difficulty} />
+
+        <div style={{ marginTop: 20 }}>
+          <Card
+            title={`${DIFFICULTY_LABEL[difficulty]} · all-time`}
+            meta={<Tag state="pass">{rows.length} entries</Tag>}
+          >
+            {rows.length === 0 ? <EmptyState /> : <Table rows={rows} />}
+          </Card>
+        </div>
 
         <div style={{ marginTop: 32 }}>
           <Link
@@ -80,6 +112,44 @@ export default async function LeaderboardPage() {
         </div>
       </main>
     </>
+  );
+}
+
+function DifficultyTabs({ current }: { current: Difficulty }) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${DIFFICULTIES.length}, 1fr)`,
+        gap: 1,
+        background: 'var(--mx-line-soft)',
+        border: '1px solid var(--mx-line-soft)',
+      }}
+    >
+      {DIFFICULTIES.map((d) => {
+        const active = current === d;
+        return (
+          <Link
+            key={d}
+            href={`/leaderboard?difficulty=${d}`}
+            style={{
+              background: active ? 'var(--mx-slate)' : 'var(--mx-void)',
+              padding: '14px 12px',
+              textAlign: 'center',
+              color: active ? 'var(--mx-signal)' : 'var(--mx-fog)',
+              fontFamily: 'var(--mx-font-mono)',
+              fontSize: 11,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              transition: 'color var(--mx-dur) var(--mx-ease)',
+            }}
+          >
+            {DIFFICULTY_LABEL[d]}
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 

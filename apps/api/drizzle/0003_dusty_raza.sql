@@ -1,0 +1,1 @@
+ALTER TABLE "runs" ADD COLUMN "difficulty" text DEFAULT 'medium' NOT NULL;

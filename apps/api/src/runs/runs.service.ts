@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import type { Difficulty } from '@mentisix/sim';
 import type { ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { type Observable, ReplaySubject } from 'rxjs';
@@ -10,6 +11,7 @@ import { RunsRepository } from './runs.repository.js';
 type RunRecord = {
   id: string;
   challenge: 'treasure-hunt';
+  difficulty: Difficulty;
   seed: number;
   model: { provider: ProviderId; model: string };
   status: RunStatus;
@@ -46,6 +48,7 @@ export class RunsService {
     const record: RunRecord = {
       id,
       challenge: dto.challenge,
+      difficulty: (dto.difficulty as Difficulty | undefined) ?? 'medium',
       seed,
       model: { provider: dto.model.provider as ProviderId, model: dto.model.model },
       status: 'queued',
@@ -83,6 +86,7 @@ export class RunsService {
       const finish = await this.harness.run({
         runId: record.id,
         seed: record.seed,
+        difficulty: record.difficulty,
         model: record.model,
         apiKey,
         options: options ?? {},
@@ -108,6 +112,7 @@ export class RunsService {
         await this.repo.insertTerminal({
           id: record.id,
           challenge: record.challenge,
+          difficulty: record.difficulty,
           seed: record.seed,
           provider: record.model.provider,
           model: record.model.model,
@@ -136,6 +141,7 @@ export class RunsService {
     return {
       id: r.id,
       challenge: r.challenge,
+      difficulty: r.difficulty,
       seed: r.seed,
       model: r.model,
       status: r.status,

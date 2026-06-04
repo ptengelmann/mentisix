@@ -6,7 +6,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 async function fetchTop(): Promise<LeaderboardRow[]> {
   try {
-    const res = await fetch(`${API_URL}/leaderboard/treasure-hunt`, { cache: 'no-store' });
+    const res = await fetch(`${API_URL}/leaderboard/treasure-hunt?difficulty=medium`, {
+      cache: 'no-store',
+    });
     if (!res.ok) return [];
     const rows = (await res.json()) as LeaderboardRow[];
     return rows.slice(0, 3);

@@ -1,3 +1,4 @@
+import type { Difficulty } from '@mentisix/sim';
 import type { ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
@@ -7,6 +8,7 @@ import { runs } from '../db/schema.js';
 export type PersistedRun = {
   id: string;
   challenge: 'treasure-hunt';
+  difficulty: Difficulty;
   seed: number;
   provider: ProviderId;
   model: string;
@@ -35,6 +37,7 @@ export class RunsRepository {
     await this.db.insert(runs).values({
       id: record.id,
       challenge: record.challenge,
+      difficulty: record.difficulty,
       seed: record.seed,
       provider: record.provider,
       model: record.model,
@@ -57,6 +60,7 @@ export class RunsRepository {
     const summary: RunSummary = {
       id: row.id,
       challenge: row.challenge as 'treasure-hunt',
+      difficulty: (row.difficulty as Difficulty) ?? 'medium',
       seed: row.seed,
       model: { provider: row.provider as ProviderId, model: row.model },
       status: row.status as RunStatus,
@@ -77,6 +81,7 @@ export class RunsRepository {
     return {
       id: record.id,
       challenge: record.challenge,
+      difficulty: record.difficulty,
       seed: record.seed,
       model: { provider: record.provider, model: record.model },
       status: record.status,

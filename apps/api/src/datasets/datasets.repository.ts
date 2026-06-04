@@ -1,3 +1,4 @@
+import type { Difficulty } from '@mentisix/sim';
 import type {
   ChallengeSlug,
   DatasetRow,
@@ -7,7 +8,7 @@ import type {
   RunStatus,
 } from '@mentisix/types';
 import { Inject, Injectable } from '@nestjs/common';
-import { sql } from 'drizzle-orm';
+import { type SQL, sql } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module.js';
 import { runs } from '../db/schema.js';
 
@@ -20,12 +21,19 @@ export class DatasetsRepository {
    * order (by created_at). The caller serializes each row to JSONL.
    * We hold no buffer larger than one row.
    */
-  async *streamRows(challenge: ChallengeSlug): AsyncGenerator<DatasetRow, void, void> {
-    const rows = await this.db.select().from(runs).where(sql`${runs.challenge} = ${challenge}`);
+  async *streamRows(
+    challenge: ChallengeSlug,
+    difficulty?: Difficulty,
+  ): AsyncGenerator<DatasetRow, void, void> {
+    const where = difficulty
+      ? sql`${runs.challenge} = ${challenge} and ${runs.difficulty} = ${difficulty}`
+      : sql`${runs.challenge} = ${challenge}`;
+    const rows = await this.db.select().from(runs).where(where);
     for (const row of rows) {
       yield {
         id: row.id,
         challenge: row.challenge as ChallengeSlug,
+        difficulty: ((row.difficulty as Difficulty) ?? 'medium') as Difficulty,
         seed: row.seed,
         provider: row.provider as ProviderId,
         model: row.model,
@@ -42,10 +50,14 @@ export class DatasetsRepository {
     }
   }
 
-  async stats(challenge: ChallengeSlug): Promise<DatasetStats> {
+  async stats(challenge: ChallengeSlug, difficulty?: Difficulty): Promise<DatasetStats> {
+    const whereClause: SQL = difficulty
+      ? sql`where challenge = ${challenge} and difficulty = ${difficulty}`
+      : sql`where challenge = ${challenge}`;
     const aggregates = await this.db.execute<{
       provider: string;
       model: string;
+      difficulty: string;
       runs: number | string;
       passes: number | string;
       total_tokens: number | string;
@@ -55,14 +67,15 @@ export class DatasetsRepository {
       select
         provider,
         model,
+        difficulty,
         count(*)::int as runs,
         sum(case when status = 'passed' then 1 else 0 end)::int as passes,
         coalesce(sum(tokens_used), 0)::bigint as total_tokens,
         coalesce(sum(ms_used), 0)::bigint as total_ms,
         avg(score) filter (where status = 'passed') as avg_score
       from runs
-      where challenge = ${challenge}
-      group by provider, model
+      ${whereClause}
+      group by provider, model, difficulty
       order by passes desc, model asc
     `);
 
@@ -72,6 +85,7 @@ export class DatasetsRepository {
       return {
         provider: row.provider as ProviderId,
         model: row.model,
+        difficulty: ((row.difficulty as Difficulty) ?? 'medium') as Difficulty,
         runs: runCount,
         passes,
         passRate: runCount === 0 ? 0 : passes / runCount,

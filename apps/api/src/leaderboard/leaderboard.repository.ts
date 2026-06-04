@@ -1,3 +1,4 @@
+import type { Difficulty } from '@mentisix/sim';
 import type { ChallengeSlug, LeaderboardRow } from '@mentisix/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
@@ -10,11 +11,11 @@ export class LeaderboardRepository {
   constructor(@Inject(DB) private readonly db: Db) {}
 
   /**
-   * Best-per-(provider, model) ranking for a challenge. Highest score wins,
-   * fewer steps breaks ties. Only counts runs with status='passed'. Failed
-   * runs and crashes don't fill the board.
+   * Best-per-(provider, model) ranking for a challenge + difficulty.
+   * Highest score wins, fewer steps breaks ties. Only counts runs with
+   * status='passed'. Failed runs and crashes don't fill the board.
    */
-  async top(challenge: ChallengeSlug): Promise<LeaderboardRow[]> {
+  async top(challenge: ChallengeSlug, difficulty: Difficulty): Promise<LeaderboardRow[]> {
     const rows = await this.db.execute<{
       provider: string;
       model: string;
@@ -35,12 +36,12 @@ export class LeaderboardRepository {
             order by score desc nulls last, steps_used asc
           ) as rk
         from runs
-        where challenge = ${challenge} and status = 'passed'
+        where challenge = ${challenge} and difficulty = ${difficulty} and status = 'passed'
       ),
       counts as (
         select provider, model, count(*)::int as runs
         from runs
-        where challenge = ${challenge}
+        where challenge = ${challenge} and difficulty = ${difficulty}
         group by provider, model
       )
       select
@@ -60,6 +61,7 @@ export class LeaderboardRepository {
     return rows.map((row, i) => ({
       rank: i + 1,
       model: { provider: row.provider as LeaderboardRow['model']['provider'], model: row.model },
+      difficulty,
       bestScore: Number(row.best_score),
       bestStepsUsed: Number(row.best_steps_used),
       runs: Number(row.runs),
