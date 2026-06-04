@@ -1,0 +1,35 @@
+{
+  "name": "@mentisix/web",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Mentisix web — the public dojo. Frontend only.",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000 --turbopack",
+    "start": "next start --port 3000",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@mentisix/brand": "workspace:*",
+    "@mentisix/sdk": "workspace:*",
+    "@mentisix/types": "workspace:*",
+    "@mentisix/ui": "workspace:*",
+    "next": "15.1.2",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@mentisix/config-typescript": "workspace:*",
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.2"
+  }
+}

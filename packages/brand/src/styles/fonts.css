@@ -1,0 +1,18 @@
+/* ============================================================
+   MENTISIX — Font loading
+   Option A (fastest to wire): keep these <link>/@import lines.
+   Option B (Next.js, recommended): self-host JetBrains Mono via
+   next/font/google and General Sans via next/font/local — see README.
+   ============================================================ */
+
+/* General Sans — geometric grotesk · human voice (Fontshare) */
+@import url("https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap");
+
+/* JetBrains Mono — machine voice: data, labels, scores, code (Google) */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+/* Tabular numerals everywhere numbers are data (leaderboards, timers) */
+.mx-tabular {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}

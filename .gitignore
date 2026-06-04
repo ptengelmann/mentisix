@@ -36,3 +36,9 @@ coverage
 
 # next
 next-env.d.ts
+
+# husky internals
+.husky/_
+
+# Claude Code local settings (user-specific permissions)
+.claude/settings.local.json

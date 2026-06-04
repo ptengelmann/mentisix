@@ -1,0 +1,29 @@
+{
+  "name": "@mentisix/sim",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Grid-world cognition engine — pure TS, no I/O.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "lint": "biome check src",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@mentisix/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@mentisix/config-typescript": "workspace:*",
+    "typescript": "5.7.2"
+  }
+}

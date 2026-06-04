@@ -1,0 +1,14 @@
+{
+  "name": "@mentisix/config-typescript",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "files": ["base.json", "library.json", "react-library.json", "nextjs.json", "nestjs.json"],
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./react-library.json": "./react-library.json",
+    "./nextjs.json": "./nextjs.json",
+    "./nestjs.json": "./nestjs.json"
+  }
+}
