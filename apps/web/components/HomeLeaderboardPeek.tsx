@@ -122,12 +122,23 @@ function Row({ row }: { row: LeaderboardRow }) {
           verticalAlign: 'middle',
           textAlign: 'right',
           fontFamily: 'var(--mx-font-mono)',
-          fontSize: 13,
+          fontSize: 12,
           color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)',
-          width: 90,
+          width: 120,
         }}
       >
-        {row.bestScore}
+        <div>{row.runs > 0 ? `${Math.round((row.passes / row.runs) * 100)}%` : '·'}</div>
+        <div
+          style={{
+            fontSize: 9.5,
+            color: 'var(--mx-fog-dim)',
+            letterSpacing: '0.14em',
+            marginTop: 3,
+            textTransform: 'uppercase',
+          }}
+        >
+          {row.passes}/{row.runs}
+        </div>
       </td>
     </tr>
   );

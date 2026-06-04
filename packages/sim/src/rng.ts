@@ -1,5 +1,5 @@
 /**
- * Deterministic seeded RNG — mulberry32.
+ * Deterministic seeded RNG. mulberry32.
  *
  * Cheap, fast, good distribution for game purposes. Two runs with the same
  * seed produce identical streams. Returned function yields uniform doubles

@@ -1,5 +1,5 @@
 /**
- * MENTISIX — Tailwind theme extension
+ * MENTISIX. Tailwind theme extension
  * Merge `theme.extend` into your tailwind.config.{js,ts}.
  * Pairs with shadcn/ui: map shadcn CSS vars to these in globals.css.
  *

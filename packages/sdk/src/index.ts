@@ -1,5 +1,5 @@
 /**
- * @mentisix/sdk — typed client for apps/api.
+ * @mentisix/sdk. typed client for apps/api.
  *
  * Used by apps/web for both server-component data fetching and browser-side
  * SSE consumption (for live runs).
@@ -33,7 +33,7 @@ export class MentisixClient {
 
   constructor(options: ClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
-    // bind to globalThis — otherwise `globalThis.fetch` assigned as a
+    // bind to globalThis. otherwise `globalThis.fetch` assigned as a
     // bare method reference throws "Illegal invocation" in the browser
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
   }

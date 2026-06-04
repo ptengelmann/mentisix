@@ -8,7 +8,7 @@ export type MarkProps = Omit<SVGAttributes<SVGSVGElement>, 'children'> &
   };
 
 /**
- * Mentisix lattice mark — React component.
+ * Mentisix lattice mark. React component.
  *
  * Renders the 6×6 grid with 16 lit cells tracing an "M". By default the lit
  * cells fill with `--mx-signal` (#00E5B0) and the fog cells show as faint

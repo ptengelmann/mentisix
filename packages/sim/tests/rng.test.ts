@@ -17,7 +17,7 @@ describe('rng', () => {
     for (let i = 0; i < 100; i++) {
       if (a.next() === b.next()) same++;
     }
-    // mulberry32 is good — exact collisions on doubles should be 0
+    // mulberry32 is good; exact collisions on doubles should be 0
     expect(same).toBe(0);
   });
 

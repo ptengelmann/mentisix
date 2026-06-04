@@ -1,5 +1,5 @@
 /**
- * Mentisix sim — core types for the Treasure Hunt grid world.
+ * Mentisix sim. Core types for the Treasure Hunt grid world.
  *
  * Everything here is data only. Pure functions in sibling modules
  * (`step.ts`, `observe.ts`, `procgen/`) consume and return these shapes.

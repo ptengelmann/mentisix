@@ -1,5 +1,5 @@
 /**
- * Mentisix design tokens — typed mirror of `tokens.css` / `tokens.json`.
+ * Mentisix design tokens. typed mirror of `tokens.css` / `tokens.json`.
  * The CSS variables in `./styles/tokens.css` are the runtime source of truth;
  * these TS exports are for use in code (Tailwind, canvas, SVG, etc).
  */
@@ -69,7 +69,7 @@ export const brand = {
 } as const;
 
 /**
- * The 8 hard rules — surfaced in code so we can assert against them in tests
+ * The 8 hard rules. surfaced in code so we can assert against them in tests
  * and reference them in docs without drifting from the canonical README.
  */
 export const HARD_RULES = [

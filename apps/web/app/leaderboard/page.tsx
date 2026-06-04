@@ -75,13 +75,14 @@ export default async function LeaderboardPage({
             style={{
               fontSize: 16,
               color: 'var(--mx-fog)',
-              maxWidth: '54ch',
-              lineHeight: 1.5,
+              maxWidth: '60ch',
+              lineHeight: 1.55,
               margin: 0,
             }}
           >
-            Best score per model across every run. Highest first; fewer steps breaks ties. Only
-            passed runs make the board.
+            Ranked by Bayesian-shrunken pass rate (Beta(1,1) prior + observed runs) so a single
+            lucky pass can't crown a model. Best score and steps are tie-breakers. £/success uses
+            published per-token prices when known.
           </p>
         </div>
 
@@ -169,9 +170,10 @@ function Table({ rows }: { rows: LeaderboardRow[] }) {
         >
           <th style={{ width: 50, padding: '12px 20px' }}>Rank</th>
           <th style={{ padding: '12px 20px' }}>Model</th>
-          <th style={{ width: 110, padding: '12px 20px', textAlign: 'right' }}>Score</th>
-          <th style={{ width: 110, padding: '12px 20px', textAlign: 'right' }}>Steps</th>
+          <th style={{ width: 110, padding: '12px 20px', textAlign: 'right' }}>Pass rate</th>
+          <th style={{ width: 100, padding: '12px 20px', textAlign: 'right' }}>Best</th>
           <th style={{ width: 90, padding: '12px 20px', textAlign: 'right' }}>Runs</th>
+          <th style={{ width: 130, padding: '12px 20px', textAlign: 'right' }}>£ / success</th>
         </tr>
       </thead>
       <tbody>
@@ -250,11 +252,22 @@ function Row({ row }: { row: LeaderboardRow }) {
           verticalAlign: 'middle',
           textAlign: 'right',
           fontFamily: 'var(--mx-font-mono)',
-          fontSize: 15,
+          fontSize: 13,
           color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)',
         }}
       >
-        {row.bestScore}
+        <div>{formatPassRate(row.passes, row.runs)}</div>
+        <div
+          style={{
+            fontSize: 10,
+            color: 'var(--mx-fog-dim)',
+            letterSpacing: '0.14em',
+            marginTop: 4,
+            textTransform: 'uppercase',
+          }}
+        >
+          shrunk {(row.passRateShrunk * 100).toFixed(0)}%
+        </div>
       </td>
       <td
         className="mx-tabular"
@@ -263,11 +276,24 @@ function Row({ row }: { row: LeaderboardRow }) {
           verticalAlign: 'middle',
           textAlign: 'right',
           fontFamily: 'var(--mx-font-mono)',
-          fontSize: 13,
-          color: 'var(--mx-bone)',
+          fontSize: 14,
+          color: isTop ? 'var(--mx-signal)' : 'var(--mx-bone)',
         }}
       >
-        {row.bestStepsUsed}
+        {row.bestScore > 0 ? row.bestScore : '·'}
+        {row.bestStepsUsed > 0 ? (
+          <div
+            style={{
+              fontSize: 10,
+              color: 'var(--mx-fog-dim)',
+              letterSpacing: '0.14em',
+              marginTop: 4,
+              textTransform: 'uppercase',
+            }}
+          >
+            {row.bestStepsUsed} steps
+          </div>
+        ) : null}
       </td>
       <td
         className="mx-tabular"
@@ -282,8 +308,39 @@ function Row({ row }: { row: LeaderboardRow }) {
       >
         {row.runs}
       </td>
+      <td
+        className="mx-tabular"
+        style={{
+          padding: '16px 20px',
+          verticalAlign: 'middle',
+          textAlign: 'right',
+          fontFamily: 'var(--mx-font-mono)',
+          fontSize: 13,
+          color: 'var(--mx-fog)',
+        }}
+      >
+        {row.costPerSuccessGBP !== undefined
+          ? formatGBP(row.costPerSuccessGBP)
+          : row.runs > 0 && row.passes === 0
+            ? 'no pass yet'
+            : '·'}
+      </td>
     </tr>
   );
+}
+
+function formatPassRate(passes: number, runs: number): string {
+  if (runs === 0) return '·';
+  const pct = (passes / runs) * 100;
+  return `${pct.toFixed(0)}%  ${passes}/${runs}`;
+}
+
+function formatGBP(value: number): string {
+  if (value === 0) return 'free';
+  if (value < 0.001) return '<£0.001';
+  if (value < 0.01) return `£${value.toFixed(4)}`;
+  if (value < 1) return `£${value.toFixed(3)}`;
+  return `£${value.toFixed(2)}`;
 }
 
 function EmptyState() {
