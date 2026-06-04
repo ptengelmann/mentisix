@@ -32,7 +32,7 @@ const PAUSE_MS = 1100;
 type Telemetry = { seed: number; step: number; status: 'live' | 'won' };
 
 /**
- * Live demo loop — runs a BFS-driven agent against fresh procgen seeds
+ * Live demo loop. Runs a BFS-driven agent against fresh procgen seeds
  * forever, in the browser, no API hits. Pure ambient theatre for the
  * landing page. Each seed: generate → plan optimal solve → animate →
  * brief pause → next seed.
@@ -266,7 +266,7 @@ function paintCell(ctx: CanvasRenderingContext2D, cell: Cell | undefined, x: num
 }
 
 /**
- * Optimal-solve BFS for the demo — sees the whole grid (this is theatre,
+ * Optimal-solve BFS for the demo. Sees the whole grid (this is theatre,
  * not the dojo). Search space is bounded by (cells × 2^keys × 2^treasures)
  * so for the 12×12 world this terminates in single-digit ms.
  */

@@ -2,9 +2,9 @@ import { index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-o
 
 /**
  * One row per completed Treasure Hunt run. The harness writes here on
- * terminal state; the leaderboard reads from here. We deliberately don't
- * persist event streams in this table — that comes in a separate replay
- * artifact in a follow-up.
+ * terminal state; the leaderboard reads aggregates, /runs/:id/replay
+ * reads the full event log out of the jsonb column for playback, and
+ * /datasets/treasure-hunt/runs.jsonl streams every row to the world.
  */
 export const runs = pgTable(
   'runs',

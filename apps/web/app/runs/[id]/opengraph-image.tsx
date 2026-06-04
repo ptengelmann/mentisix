@@ -66,7 +66,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const accent = passed ? C.signal : C.fog;
   const headline = passed ? 'CLEARED' : summary.status === 'failed' ? 'FAILED' : 'RAN';
 
-  // Grid geometry — 12×12 fitted to ~560px square on the left
+  // Grid geometry. 12×12 fitted to ~560px square on the left.
   const gridPx = 540;
   const cellPx = gridPx / world.width;
   const ox = 76;
@@ -155,7 +155,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             lineHeight: 1,
           }}
         >
-          {summary.score ?? '—'}
+          {summary.score ?? '·'}
         </div>
         <div
           style={{

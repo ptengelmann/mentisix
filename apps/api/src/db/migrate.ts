@@ -12,8 +12,8 @@ if (!url) {
   process.exit(1);
 }
 
-// Parse the URL ourselves so we can hand explicit fields to postgres.js
-// — bypasses any URL-decoding ambiguity on special chars in the password.
+// Parse the URL ourselves so we can hand explicit fields to postgres.js.
+// Bypasses any URL-decoding ambiguity on special chars in the password.
 const parsed = new URL(url);
 const client = postgres({
   host: parsed.hostname,

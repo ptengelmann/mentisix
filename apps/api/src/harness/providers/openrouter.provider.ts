@@ -4,7 +4,7 @@ import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
 /**
- * OpenRouter adapter — the meta-provider that routes to ~200 models with
+ * OpenRouter adapter. The meta-provider that routes to ~200 models with
  * one OpenAI-compatible endpoint. Models are addressed as `vendor/model`
  * (e.g. `anthropic/claude-sonnet-4-6`, `x-ai/grok-3`, `deepseek/deepseek-v3`).
  *

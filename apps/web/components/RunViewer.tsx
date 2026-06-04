@@ -176,7 +176,7 @@ function titleFor(status: RunUiState['status'], terminal: RunUiState['terminalSt
   if (status === 'live') return 'Watching it think';
   if (status === 'done') {
     if (terminal === 'passed') return 'Passed';
-    if (terminal === 'failed') return 'Failed — out of steps';
+    if (terminal === 'failed') return 'Failed · out of steps';
     return 'Run ended';
   }
   if (status === 'error') return 'Run errored';
@@ -298,7 +298,7 @@ function ShareCard({
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      // ignore — fall back to manual copy from the input
+      // ignore, fall back to manual copy from the input
     }
   };
 
@@ -364,7 +364,7 @@ function buildTweetText({
   const model = modelName ?? 'an LLM';
   const who = handle ? `@${handle} · ` : '';
   if (terminal === 'passed') {
-    return `${who}${model} cleared Mentisix Treasure Hunt · seed ${seed} · score ${score ?? '—'}`;
+    return `${who}${model} cleared Mentisix Treasure Hunt · seed ${seed} · score ${score ?? '·'}`;
   }
   if (terminal === 'failed') {
     return `${who}I watched ${model} fail Mentisix Treasure Hunt · seed ${seed} · score ${score ?? 0}`;

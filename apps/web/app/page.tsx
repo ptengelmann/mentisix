@@ -1,4 +1,5 @@
 import { Pattern } from '@mentisix/brand/components';
+import type { DatasetStats } from '@mentisix/types';
 import { Button, Kicker, Tag } from '@mentisix/ui';
 import Link from 'next/link';
 import { DemoLoop } from '../components/DemoLoop';
@@ -6,15 +7,29 @@ import { HomeLeaderboardPeek } from '../components/HomeLeaderboardPeek';
 import { Nav } from '../components/Nav';
 import { SupportedModels } from '../components/SupportedModels';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
+async function fetchDatasetStats(): Promise<DatasetStats | null> {
+  try {
+    const res = await fetch(`${API_URL}/datasets/treasure-hunt/stats.json`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as DatasetStats;
+  } catch {
+    return null;
+  }
+}
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await fetchDatasetStats();
+
   return (
     <>
       <Nav />
 
-      {/* ambient lattice fog — texture, not noise */}
+      {/* ambient lattice fog · texture, not noise */}
       <div
         aria-hidden="true"
         style={{
@@ -45,6 +60,7 @@ export default function HomePage() {
         <Manifesto />
         <Definitions />
         <BoardSection />
+        <DatasetSection stats={stats} />
         <Footer />
       </main>
     </>
@@ -318,6 +334,159 @@ function BoardSection() {
       <HomeLeaderboardPeek />
     </section>
   );
+}
+
+function DatasetSection({ stats }: { stats: DatasetStats | null }) {
+  return (
+    <section
+      style={{
+        maxWidth: 1240,
+        margin: '0 auto',
+        padding: 'clamp(80px, 11vh, 140px) clamp(20px, 5vw, 84px)',
+        borderTop: '1px solid var(--mx-line-soft)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          gap: 24,
+          flexWrap: 'wrap',
+          marginBottom: 36,
+        }}
+      >
+        <div>
+          <Kicker index="04">Open data</Kicker>
+          <h2
+            style={{
+              fontSize: 'clamp(28px, 4.4vw, 52px)',
+              fontWeight: 600,
+              letterSpacing: '-0.03em',
+              margin: '14px 0 0',
+              maxWidth: '22ch',
+              color: 'var(--mx-bone)',
+            }}
+          >
+            Every run, every reasoning step. <span style={{ color: 'var(--mx-fog)' }}>Public.</span>
+          </h2>
+        </div>
+        <Tag state="pass">CC-BY-4.0</Tag>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.1fr)',
+          gap: 'clamp(32px, 5vw, 64px)',
+          alignItems: 'start',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 1,
+            background: 'var(--mx-line-soft)',
+            border: '1px solid var(--mx-line-soft)',
+          }}
+        >
+          <BigStat label="Runs" value={stats ? String(stats.totalRuns) : '·'} highlight />
+          <BigStat label="Passed" value={stats ? String(stats.totalPassedRuns) : '·'} />
+          <BigStat label="Models" value={stats ? String(stats.byModel.length) : '·'} />
+          <BigStat label="Tokens" value={stats ? compactNumber(stats.totalTokens) : '·'} />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 22,
+            color: 'var(--mx-fog)',
+            fontSize: 16,
+            lineHeight: 1.55,
+          }}
+        >
+          <p style={{ margin: 0 }}>
+            Every Mentisix run, the chain of thought, every action, every step of the ground-truth
+            simulator, is downloadable as line-delimited JSON. No auth, no paywall, CC-BY-4.0. Cite
+            it in your eval paper or pipe it straight into{' '}
+            <code
+              style={{
+                fontFamily: 'var(--mx-font-mono)',
+                fontSize: 13,
+                color: 'var(--mx-bone)',
+                background: 'var(--mx-void)',
+                padding: '2px 6px',
+              }}
+            >
+              jq
+            </code>
+            .
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <Link href="/dataset">
+              <Button variant="signal" dot>
+                Read the dataset
+              </Button>
+            </Link>
+            <a
+              href={`${API_URL}/datasets/treasure-hunt/runs.jsonl`}
+              download="mentisix-runs.jsonl"
+              style={{ textDecoration: 'none' }}
+            >
+              <Button>Download JSONL</Button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BigStat({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div style={{ background: 'var(--mx-void)', padding: 'clamp(24px, 4vw, 44px)' }}>
+      <div
+        className="mx-tabular"
+        style={{
+          fontFamily: 'var(--mx-font-mono)',
+          fontSize: 'clamp(40px, 6vw, 72px)',
+          letterSpacing: '-0.02em',
+          lineHeight: 1,
+          color: highlight ? 'var(--mx-signal)' : 'var(--mx-bone)',
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontFamily: 'var(--mx-font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: 'var(--mx-fog)',
+          marginTop: 14,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function compactNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
 }
 
 function Footer() {

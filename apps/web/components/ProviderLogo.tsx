@@ -120,7 +120,7 @@ function GroqMark(props: LogoProps) {
 }
 
 /**
- * Solver mark — a tiny lattice trail with a start dot, an L-bend, and a
+ * Solver mark. A tiny lattice trail with a start dot, an L-bend, and a
  * terminal square. Re-uses the Mentisix grammar (the agent walking the
  * grid) to make clear this is our reference player.
  */

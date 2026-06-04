@@ -269,7 +269,7 @@ function StatsCard({ stats }: { stats: DatasetStats }) {
                       color: 'var(--mx-bone)',
                     }}
                   >
-                    {m.avgScore === null ? '—' : Math.round(m.avgScore)}
+                    {m.avgScore === null ? '·' : Math.round(m.avgScore)}
                   </td>
                   <td
                     className="mx-tabular"
@@ -446,9 +446,9 @@ function LicenseCard() {
         >
           Creative Commons Attribution 4.0
         </a>
-        . Use it commercially or for research, modify and redistribute — credit Mentisix with a
-        link. Per-run model outputs reflect the originating provider's terms; the structure,
-        scoring, and ground-truth simulator state are ours.
+        . Use it commercially or for research, modify and redistribute. Credit Mentisix with a link.
+        Per-run model outputs reflect the originating provider's terms; the structure, scoring, and
+        ground-truth simulator state are ours.
       </div>
     </Card>
   );

@@ -4,7 +4,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
-// Inline the schema at the root — passing `name` would wrap it as
+// Inline the schema at the root. Passing `name` would wrap it as
 // `{ $ref, definitions: { AgentResponse: ... } }`, which OpenAI strict
 // mode rejects because the root lacks `type: "object"`.
 const SCHEMA = zodToJsonSchema(AgentResponseSchema, { $refStrategy: 'none' });
