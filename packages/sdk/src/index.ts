@@ -6,6 +6,7 @@
  */
 
 import type {
+  DatasetStats,
   LeaderboardRow,
   RunEvent,
   RunStartRequest,
@@ -99,6 +100,18 @@ export class MentisixClient {
     if (!res.ok) throw new Error(`mentisix: leaderboard ${res.status}`);
     return res.json() as Promise<LeaderboardRow[]>;
   }
+
+  async datasetStats(challenge: string): Promise<DatasetStats> {
+    const res = await this.#fetch(
+      `${this.baseUrl}/datasets/${encodeURIComponent(challenge)}/stats.json`,
+    );
+    if (!res.ok) throw new Error(`mentisix: datasetStats ${res.status}`);
+    return res.json() as Promise<DatasetStats>;
+  }
+
+  datasetJsonlUrl(challenge: string): string {
+    return `${this.baseUrl}/datasets/${encodeURIComponent(challenge)}/runs.jsonl`;
+  }
 }
 
 function splitEvents(buf: string): { frames: string[]; tail: string } {
@@ -129,6 +142,9 @@ export type RunReplay = {
 };
 
 export type {
+  DatasetRow,
+  DatasetStats,
+  DatasetStatsByModel,
   LeaderboardRow,
   RunEvent,
   RunStartRequest,
