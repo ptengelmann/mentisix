@@ -4,10 +4,13 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
-const TOOL_INPUT_SCHEMA = zodToJsonSchema(AgentResponseSchema, {
-  name: 'AgentResponse',
-  $refStrategy: 'none',
-});
+// Inline the schema at the root. `name` would produce a `$ref` wrapper
+// whose root has no `type: "object"`, breaking Anthropic's tool schema
+// extraction below.
+const TOOL_INPUT_SCHEMA = zodToJsonSchema(AgentResponseSchema, { $refStrategy: 'none' });
+
+/** Exposed for regression tests. */
+export const ANTHROPIC_TOOL_INPUT_SCHEMA = extractInputSchema(TOOL_INPUT_SCHEMA);
 
 const ACT_TOOL_NAME = 'act';
 
@@ -26,7 +29,7 @@ export class AnthropicProvider implements ModelProvider {
         {
           name: ACT_TOOL_NAME,
           description: 'Choose the next action and provide brief reasoning.',
-          input_schema: extractInputSchema(TOOL_INPUT_SCHEMA),
+          input_schema: ANTHROPIC_TOOL_INPUT_SCHEMA,
         },
       ],
       tool_choice: { type: 'tool', name: ACT_TOOL_NAME },

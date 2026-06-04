@@ -4,10 +4,13 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { AgentResponseSchema } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
-const SCHEMA = zodToJsonSchema(AgentResponseSchema, {
-  name: 'AgentResponse',
-  $refStrategy: 'none',
-});
+// Inline the schema at the root — passing `name` would wrap it as
+// `{ $ref, definitions: { AgentResponse: ... } }`, which OpenAI strict
+// mode rejects because the root lacks `type: "object"`.
+const SCHEMA = zodToJsonSchema(AgentResponseSchema, { $refStrategy: 'none' });
+
+/** Exposed for regression tests. */
+export const OPENAI_STRUCTURED_SCHEMA = schemaForOpenAI(SCHEMA);
 
 @Injectable()
 export class OpenAIProvider implements ModelProvider {
@@ -26,7 +29,7 @@ export class OpenAIProvider implements ModelProvider {
         type: 'json_schema',
         json_schema: {
           name: 'AgentResponse',
-          schema: schemaForOpenAI(SCHEMA),
+          schema: OPENAI_STRUCTURED_SCHEMA,
           strict: true,
         },
       },
@@ -50,9 +53,10 @@ export class OpenAIProvider implements ModelProvider {
  * there; we normalize what differs.
  */
 function schemaForOpenAI(schema: ReturnType<typeof zodToJsonSchema>): Record<string, unknown> {
-  const out = JSON.parse(JSON.stringify(schema));
-  walk(out);
-  return out;
+  // OpenAI strict mode rejects $schema metadata at the root.
+  const { $schema: _meta, ...rest } = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
+  walk(rest);
+  return rest;
 }
 
 function walk(node: unknown): void {
