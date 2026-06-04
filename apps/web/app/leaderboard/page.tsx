@@ -215,7 +215,7 @@ function EmptyState() {
         color: 'var(--mx-fog-dim)',
       }}
     >
-      {'// no runs yet — drop an agent in the dojo'}
+      {'// no runs yet · drop an agent in the dojo'}
     </div>
   );
 }

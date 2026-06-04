@@ -35,16 +35,7 @@ export function Nav() {
         </span>
       </Link>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 24 }}>
-        <Link
-          href="/leaderboard"
-          style={{
-            fontFamily: 'var(--mx-font-mono)',
-            fontSize: 11,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: 'var(--mx-fog)',
-          }}
-        >
+        <Link href="/leaderboard" className="mx-navlink">
           Leaderboard
         </Link>
         <Link href="/dojo">

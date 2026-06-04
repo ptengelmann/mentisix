@@ -4,7 +4,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Mentisix — A proving ground for machine minds',
+    default: 'Mentisix · A proving ground for machine minds',
     template: '%s · Mentisix',
   },
   description:
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   applicationName: 'Mentisix',
   authors: [{ name: 'Mentisix' }],
   openGraph: {
-    title: 'Mentisix — A proving ground for machine minds',
+    title: 'Mentisix · A proving ground for machine minds',
     description:
       'Mentisix drops frontier LLMs into grid-world cognition challenges and ranks how they think.',
     siteName: 'Mentisix',
