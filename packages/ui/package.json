@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "description": "Mentisix bespoke component primitives — thin instruments, mono labels.",
+  "description": "Mentisix bespoke component primitives. Thin instruments, mono labels.",
   "type": "module",
   "sideEffects": ["./src/styles.css", "./dist/styles.css"],
   "exports": {

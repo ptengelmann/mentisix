@@ -11,7 +11,7 @@ export class LeaderboardRepository {
 
   /**
    * Best-per-(provider, model) ranking for a challenge. Highest score wins,
-   * fewer steps breaks ties. Only counts runs with status='passed' — failed
+   * fewer steps breaks ties. Only counts runs with status='passed'. Failed
    * runs and crashes don't fill the board.
    */
   async top(challenge: ChallengeSlug): Promise<LeaderboardRow[]> {

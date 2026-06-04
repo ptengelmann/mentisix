@@ -17,8 +17,8 @@ export class DatasetsRepository {
 
   /**
    * Stream every run for the challenge as `DatasetRow`. Yields in DB
-   * order (by created_at). The caller serializes each row to JSONL
-   * — we hold no buffer larger than one row.
+   * order (by created_at). The caller serializes each row to JSONL.
+   * We hold no buffer larger than one row.
    */
   async *streamRows(challenge: ChallengeSlug): AsyncGenerator<DatasetRow, void, void> {
     const rows = await this.db.select().from(runs).where(sql`${runs.challenge} = ${challenge}`);

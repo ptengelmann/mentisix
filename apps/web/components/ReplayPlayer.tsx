@@ -15,7 +15,7 @@ export type ReplayPlayerProps = {
 
 /**
  * Drives the same reducer the live viewer uses, but from a static event
- * array on a fixed cadence. Public — no API key needed to watch.
+ * array on a fixed cadence. Public, no API key needed to watch.
  */
 export function ReplayPlayer({ runId, events }: ReplayPlayerProps) {
   const [state, dispatch] = useReducer(reducer, initialState);

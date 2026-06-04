@@ -19,7 +19,7 @@ const DIRECTION_OFFSETS = {
 type Dir = keyof typeof DIRECTION_OFFSETS;
 
 /**
- * Reference player — BFS-driven Treasure Hunt solver.
+ * Reference player. BFS-driven Treasure Hunt solver.
  *
  * Sees only what real LLMs see (fog-limited observations). Builds an
  * internal map across turns, prioritises uncollected treasures, then keys,
@@ -110,13 +110,13 @@ export class SolverProvider implements ModelProvider {
       };
     }
 
-    return { reasoning: 'no reachable goal — wait', action: 'wait' };
+    return { reasoning: 'no reachable goal, wait', action: 'wait' };
   }
 
   /**
    * Goals in priority order: uncollected treasures, then keys whose color
    * isn't already in inventory, then the nearest unknown frontier cell
-   * (target an unknown cell adjacent to a known-walkable cell — when the
+   * (target an unknown cell adjacent to a known-walkable cell. When the
    * agent steps onto it, the next observation reveals it).
    */
   private findGoals(
@@ -185,7 +185,7 @@ function directionFromTo(from: Position, to: Position): Dir | null {
  * BFS from `start` to `goal`. Passable cells: known floor, known open
  * door, known key, known treasure, known closed door whose color is in
  * `inventoryBits`. Unknown cells are passable only if the goal itself is
- * the 'unknown' kind — that way we walk into fog when exploring, but
+ * the 'unknown' kind. That way we walk into fog when exploring, but
  * never blindly route through it when chasing a known objective.
  */
 function bfs(

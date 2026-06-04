@@ -8,7 +8,7 @@ import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.in
  * Stateless on purpose: a fresh run always starts at "turn 0", and the
  * NestJS singleton lifetime carries no run-to-run leakage.
  *
- * Not for production traffic — useful for integration tests and local dev.
+ * Not for production traffic. Useful for integration tests and local dev.
  */
 @Injectable()
 export class MockProvider implements ModelProvider {

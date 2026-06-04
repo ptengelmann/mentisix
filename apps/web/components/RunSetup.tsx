@@ -42,7 +42,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
       const saved = window.localStorage.getItem(HANDLE_STORAGE_KEY);
       if (saved && HANDLE_PATTERN.test(saved)) setHandle(saved);
     } catch {
-      // localStorage blocked (private mode, etc.) — silently skip.
+      // localStorage blocked (private mode, etc.). Silently skip.
     }
   }, []);
 

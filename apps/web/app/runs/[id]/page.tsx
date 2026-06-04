@@ -140,7 +140,7 @@ function ReplayHeader({ summary }: { summary: RunReplay['summary'] }) {
             letterSpacing: '-0.01em',
           }}
         >
-          {summary.score ?? '—'}
+          {summary.score ?? '·'}
         </div>
         {passed ? <Tag state="pass">Cleared</Tag> : <Tag state="fail">Did not clear</Tag>}
       </div>
