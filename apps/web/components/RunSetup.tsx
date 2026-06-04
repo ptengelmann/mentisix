@@ -3,12 +3,14 @@
 import type { ProviderId, RunStartRequest } from '@mentisix/types';
 import { Button, Input, Kicker } from '@mentisix/ui';
 import { useState } from 'react';
+import { ProviderLogo } from './ProviderLogo';
 
 const PROVIDERS: { id: ProviderId; label: string; defaultModel: string }[] = [
-  { id: 'anthropic', label: 'Anthropic', defaultModel: 'claude-sonnet-4-6' },
+  { id: 'solver', label: 'Solver', defaultModel: 'solver-1' },
+  { id: 'anthropic', label: 'Claude', defaultModel: 'claude-sonnet-4-6' },
   { id: 'openai', label: 'OpenAI', defaultModel: 'gpt-4o' },
   { id: 'groq', label: 'Groq', defaultModel: 'llama-3.3-70b-versatile' },
-  { id: 'mock', label: 'Mock (no key)', defaultModel: 'mock-1' },
+  { id: 'mock', label: 'Mock', defaultModel: 'mock-1' },
 ];
 
 export type RunSetupProps = {
@@ -17,8 +19,8 @@ export type RunSetupProps = {
 };
 
 export function RunSetup({ onStart, disabled }: RunSetupProps) {
-  const [provider, setProvider] = useState<ProviderId>('mock');
-  const [model, setModel] = useState('mock-1');
+  const [provider, setProvider] = useState<ProviderId>('solver');
+  const [model, setModel] = useState('solver-1');
   const [apiKey, setApiKey] = useState('');
   const [seed, setSeed] = useState('');
 
@@ -61,7 +63,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: `repeat(${PROVIDERS.length}, 1fr)`,
             gap: 1,
             background: 'var(--mx-line-soft)',
           }}
@@ -77,16 +79,23 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
               style={{
                 background: provider === p.id ? 'var(--mx-slate)' : 'var(--mx-void)',
                 border: 'none',
-                padding: '14px 12px',
+                padding: '16px 8px 14px',
                 color: provider === p.id ? 'var(--mx-signal)' : 'var(--mx-fog)',
                 fontFamily: 'var(--mx-font-mono)',
-                fontSize: 11,
-                letterSpacing: '0.16em',
+                fontSize: 10,
+                letterSpacing: '0.14em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 10,
+                transition:
+                  'color var(--mx-dur) var(--mx-ease), background var(--mx-dur) var(--mx-ease)',
               }}
             >
-              {p.label}
+              <ProviderLogo provider={p.id} size={22} />
+              <span style={{ lineHeight: 1.2 }}>{p.label}</span>
             </button>
           ))}
         </div>
@@ -107,7 +116,7 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          placeholder={provider === 'mock' ? 'not required for mock' : 'sk-…'}
+          placeholder={provider === 'mock' || provider === 'solver' ? 'not required' : 'sk-…'}
           autoComplete="off"
           spellCheck={false}
         />

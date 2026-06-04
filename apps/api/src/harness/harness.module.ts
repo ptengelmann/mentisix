@@ -6,6 +6,7 @@ import {
   MockProvider,
   OpenAIProvider,
   ProviderFactory,
+  SolverProvider,
 } from './providers/index.js';
 
 @Module({
@@ -14,6 +15,7 @@ import {
     AnthropicProvider,
     GroqProvider,
     MockProvider,
+    SolverProvider,
     ProviderFactory,
     HarnessService,
   ],

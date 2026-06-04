@@ -87,6 +87,8 @@ export class HarnessService {
           model: ctx.model.model,
           system: SYSTEM_PROMPT,
           user: serializeObservation(obs),
+          observation: obs,
+          runId: ctx.runId,
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

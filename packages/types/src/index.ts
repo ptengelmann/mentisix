@@ -19,8 +19,14 @@ import type {
 export type ChallengeSlug = 'treasure-hunt';
 export const CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
 
-export type ProviderId = 'openai' | 'anthropic' | 'groq' | 'mock';
-export const PROVIDERS: readonly ProviderId[] = ['openai', 'anthropic', 'groq', 'mock'] as const;
+export type ProviderId = 'openai' | 'anthropic' | 'groq' | 'mock' | 'solver';
+export const PROVIDERS: readonly ProviderId[] = [
+  'openai',
+  'anthropic',
+  'groq',
+  'mock',
+  'solver',
+] as const;
 
 export type ModelRef = {
   provider: ProviderId;

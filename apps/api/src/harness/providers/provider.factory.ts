@@ -5,6 +5,7 @@ import { GroqProvider } from './groq.provider.js';
 import { MockProvider } from './mock.provider.js';
 import { OpenAIProvider } from './openai.provider.js';
 import type { ModelProvider } from './provider.interface.js';
+import { SolverProvider } from './solver.provider.js';
 
 @Injectable()
 export class ProviderFactory {
@@ -13,6 +14,7 @@ export class ProviderFactory {
     private readonly anthropic: AnthropicProvider,
     private readonly groq: GroqProvider,
     private readonly mock: MockProvider,
+    private readonly solver: SolverProvider,
   ) {}
 
   for(id: ProviderId): ModelProvider {
@@ -25,6 +27,8 @@ export class ProviderFactory {
         return this.groq;
       case 'mock':
         return this.mock;
+      case 'solver':
+        return this.solver;
       default: {
         const _exhaustive: never = id;
         throw new Error(`unknown provider: ${_exhaustive as string}`);
