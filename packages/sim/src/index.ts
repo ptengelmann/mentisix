@@ -1,14 +1,31 @@
-/**
- * @mentisix/sim — grid-world cognition engine.
- *
- * v0 scope (next PR): "Treasure Hunt" — 12x12 grid, fog of war, 3 treasures
- * behind locked doors, 2 keys, procedural seeds. Pure TypeScript: no I/O,
- * no DOM, no network. Consumed by apps/api for run execution and by
- * apps/web for client-side replay rendering.
- */
+export type {
+  Action,
+  ActionOutcome,
+  ActionResult,
+  Cell,
+  Direction,
+  FogCell,
+  KeyColor,
+  ObservedCell,
+  Observation,
+  Position,
+  WorldConfig,
+  WorldState,
+  WorldStatus,
+} from './types.js';
+export { DEFAULT_CONFIG, DIRECTIONS, KEY_COLORS } from './types.js';
 
-import type { ChallengeSlug } from '@mentisix/types';
+export { makeRng, type Rng } from './rng.js';
+export { manhattan, inBounds, step as stepDirection } from './geometry.js';
+export { cellAt, isTerminal, totalTreasures } from './world.js';
 
-export const SUPPORTED_CHALLENGES: readonly ChallengeSlug[] = ['treasure-hunt'] as const;
+export { step } from './step.js';
+export { observe } from './observation.js';
+export { score, type ScoreBreakdown } from './score.js';
 
-export const SIM_VERSION = '0.0.0';
+export { createWorld, type CreateWorldOptions } from './procgen/index.js';
+export { isSolvable } from './procgen/solver.js';
+export { distanceMap, generateLayout } from './procgen/layout.js';
+
+export const SIM_VERSION = '0.1.0';
+export const SUPPORTED_CHALLENGES = ['treasure-hunt'] as const;
