@@ -176,6 +176,7 @@ export class HarnessService {
         seed: ctx.seed,
         maxTurns: p.maxTurns,
         factCount: p.config.facts,
+        schedule: p.schedule.map((t) => t.kind),
       });
     }
   }
