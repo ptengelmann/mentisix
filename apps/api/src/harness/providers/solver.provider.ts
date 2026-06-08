@@ -1,13 +1,16 @@
-import type { Cell, KeyColor, Observation, Position } from '@mentisix/sim';
+import type { Cell, KeyColor, Observation, Position, ProbeObservation } from '@mentisix/sim';
 import { Injectable } from '@nestjs/common';
 import type { AgentActionToken } from '../action.schema.js';
 import type { GenerateInput, GenerateOutput, ModelProvider } from './provider.interface.js';
 
 type TreasureHuntResponse = { reasoning: string; action: AgentActionToken };
+type MemoryProbeResponse = { reasoning: string; answer: string };
 
 type SolverMemory = {
-  /** "r,c" → cell we've directly observed. */
+  /** "r,c" → cell we've directly observed (Treasure Hunt). */
   knownCells: Map<string, Cell>;
+  /** key → value learned from `tell` turns (Memory Probe). */
+  factsByKey: Map<string, string>;
 };
 
 const KEY_BIT: Record<KeyColor, number> = { red: 1, blue: 2 };
@@ -21,15 +24,18 @@ const DIRECTION_OFFSETS = {
 type Dir = keyof typeof DIRECTION_OFFSETS;
 
 /**
- * Reference player. BFS-driven Treasure Hunt solver.
+ * Reference player. Knows two challenges:
  *
- * Sees only what real LLMs see (fog-limited observations). Builds an
- * internal map across turns, prioritises uncollected treasures, then keys,
- * then exploration of the unseen frontier. Uses keys to open doors when
- * the path requires it. Stateless tokens cost: zero.
+ * - **Treasure Hunt** — BFS over fog-limited observations. Builds an
+ *   internal map across turns, prioritises uncollected treasures, then
+ *   keys, then exploration of the unseen frontier. Uses keys to open
+ *   doors when the path requires it.
+ * - **Memory Probe** — stores every `tell` fact in a per-run map and
+ *   looks it up on the matching `ask` turn. Acknowledges everything
+ *   else. Wins every seed because it has perfect recall by design.
  *
- * Memory keyed by runId; entries persist for the process lifetime. With
- * 12x12 cells per run this is a few KB even at hundreds of stale entries.
+ * Both paths cost zero tokens. Memory keyed by runId; entries persist
+ * for the process lifetime.
  */
 @Injectable()
 export class SolverProvider implements ModelProvider {
@@ -37,27 +43,56 @@ export class SolverProvider implements ModelProvider {
   private readonly memory = new Map<string, SolverMemory>();
 
   async generate<T = unknown>(input: GenerateInput): Promise<GenerateOutput<T>> {
-    const obs = input.observation as Observation | undefined;
-    if (!obs || !Array.isArray((obs as Observation).visible)) {
-      // Solver only knows Treasure Hunt; for anything else, bail with a
-      // wait action and let the schema validator surface the mismatch.
-      return wait('solver: no structured observation') as GenerateOutput<T>;
-    }
+    const obs = input.observation;
     const runKey = input.runId ?? '__default__';
     const mem = this.getMemory(runKey);
-    this.absorbObservation(mem, obs);
 
-    const decision = this.decide(mem, obs);
+    if (isProbeObservation(obs)) {
+      const decision = this.decideMemoryProbe(mem, obs);
+      return { response: decision, tokensUsed: 0 } as unknown as GenerateOutput<T>;
+    }
+
+    const th = obs as Observation | undefined;
+    if (!th || !Array.isArray(th.visible)) {
+      // Solver doesn't recognise the observation shape. Surface a wait
+      // and let the schema validator complain if the shape mismatches.
+      return wait('solver: no structured observation') as GenerateOutput<T>;
+    }
+    this.absorbObservation(mem, th);
+    const decision = this.decide(mem, th);
     return { response: decision, tokensUsed: 0 } as unknown as GenerateOutput<T>;
   }
 
   private getMemory(runId: string): SolverMemory {
     let mem = this.memory.get(runId);
     if (!mem) {
-      mem = { knownCells: new Map() };
+      mem = { knownCells: new Map(), factsByKey: new Map() };
       this.memory.set(runId, mem);
     }
     return mem;
+  }
+
+  private decideMemoryProbe(mem: SolverMemory, obs: ProbeObservation): MemoryProbeResponse {
+    const current = obs.current;
+    if (current.kind === 'tell') {
+      mem.factsByKey.set(current.fact.key, current.fact.value);
+      return {
+        reasoning: `note ${current.fact.key} = "${current.fact.value}"`,
+        answer: `noted: ${current.fact.key} = ${current.fact.value}`,
+      };
+    }
+    if (current.kind === 'ask') {
+      const value = mem.factsByKey.get(current.key);
+      if (value === undefined) {
+        // Should never happen if every ask was preceded by a tell.
+        return { reasoning: `no record of ${current.key}`, answer: 'unknown' };
+      }
+      return {
+        reasoning: `recall ${current.key}`,
+        answer: value,
+      };
+    }
+    return { reasoning: 'distractor; acknowledge', answer: 'noted' };
   }
 
   private absorbObservation(mem: SolverMemory, obs: Observation): void {
@@ -154,6 +189,14 @@ function wait<T = unknown>(reason: string): GenerateOutput<T> {
     response: { reasoning: reason, action: 'wait' } as unknown as T & { reasoning: string },
     tokensUsed: 0,
   };
+}
+
+function isProbeObservation(value: unknown): value is ProbeObservation {
+  if (!value || typeof value !== 'object') return false;
+  const o = value as Record<string, unknown>;
+  const cur = o.current as Record<string, unknown> | undefined;
+  if (!cur || typeof cur !== 'object') return false;
+  return cur.kind === 'tell' || cur.kind === 'ask' || cur.kind === 'distractor';
 }
 
 function moveToken(dir: Dir): AgentActionToken {

@@ -1,4 +1,4 @@
-import type { RunStartResponse, RunSummary } from '@mentisix/types';
+import type { ChallengeSlug, RunStartResponse, RunSummary } from '@mentisix/types';
 import { Body, Controller, Get, Param, Post, Sse } from '@nestjs/common';
 import { type Observable, map } from 'rxjs';
 import { ZodValidationPipe } from '../shared/zod-validation.pipe.js';
@@ -15,7 +15,7 @@ export class RunsController {
   @Post()
   start(@Body(new ZodValidationPipe(RunStartSchema)) body: RunStartDto): RunStartResponse {
     const { runId, seed } = this.runs.startRun(body);
-    return { runId, seed, challenge: body.challenge };
+    return { runId, seed, challenge: body.challenge as ChallengeSlug };
   }
 
   @Get(':id')

@@ -152,11 +152,6 @@ export function RunSetup({ onStart, disabled }: RunSetupProps) {
               difficulties={DIFFICULTY_BY_CHALLENGE[c.id]}
               onSelect={() => {
                 setChallenge(c.id);
-                if (c.id !== 'treasure-hunt' && provider === 'solver') {
-                  setProvider('mock');
-                  setModel('mock-1');
-                  setStepDelayMs(100);
-                }
               }}
               onPickDifficulty={(d) => {
                 setChallenge(c.id);
@@ -421,79 +416,92 @@ function ChallengeCard({
   onSelect: () => void;
   onPickDifficulty: (d: Difficulty) => void;
 }) {
+  // Card container is a plain div so the difficulty pill buttons
+  // below can sit as siblings of the challenge-select button without
+  // illegal button-in-button nesting.
   return (
-    <button
-      type="button"
-      onClick={onSelect}
+    <div
       style={{
         background: selected
           ? 'linear-gradient(var(--mx-slate), var(--mx-void))'
           : 'var(--mx-void)',
         border: `1px solid ${selected ? 'var(--mx-signal-dim)' : 'var(--mx-line)'}`,
-        padding: '24px 22px 22px',
-        textAlign: 'left',
-        cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: 18,
         position: 'relative',
         transition:
           'border-color var(--mx-dur) var(--mx-ease), background var(--mx-dur) var(--mx-ease)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-        <span style={{ color: selected ? 'var(--mx-signal)' : 'var(--mx-bone)' }}>
-          <ChallengeIcon challenge={option.id} size={44} />
-        </span>
-        <div style={{ flex: 1 }}>
-          <div
-            style={{
-              fontSize: 17,
-              fontWeight: 500,
-              letterSpacing: '-0.01em',
-              color: selected ? 'var(--mx-signal)' : 'var(--mx-bone)',
-            }}
-          >
-            {option.label}
-          </div>
-          <div
-            style={{
-              fontFamily: 'var(--mx-font-mono)',
-              fontSize: 10.5,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: 'var(--mx-fog-dim)',
-              marginTop: 6,
-            }}
-          >
-            {option.tagline}
-          </div>
-        </div>
-        {selected ? (
-          <span
-            aria-hidden="true"
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: 'var(--mx-signal)',
-              boxShadow: '0 0 12px var(--mx-signal)',
-              marginTop: 4,
-            }}
-          />
-        ) : null}
-      </div>
-
-      <p
+      <button
+        type="button"
+        onClick={onSelect}
         style={{
-          margin: 0,
-          fontSize: 13,
-          lineHeight: 1.55,
-          color: 'var(--mx-fog)',
+          appearance: 'none',
+          background: 'transparent',
+          border: 'none',
+          padding: '24px 22px 18px',
+          textAlign: 'left',
+          cursor: 'pointer',
+          color: 'inherit',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
         }}
       >
-        {option.blurb}
-      </p>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <span style={{ color: selected ? 'var(--mx-signal)' : 'var(--mx-bone)' }}>
+            <ChallengeIcon challenge={option.id} size={44} />
+          </span>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
+                color: selected ? 'var(--mx-signal)' : 'var(--mx-bone)',
+              }}
+            >
+              {option.label}
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--mx-font-mono)',
+                fontSize: 10.5,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'var(--mx-fog-dim)',
+                marginTop: 6,
+              }}
+            >
+              {option.tagline}
+            </div>
+          </div>
+          {selected ? (
+            <span
+              aria-hidden="true"
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'var(--mx-signal)',
+                boxShadow: '0 0 12px var(--mx-signal)',
+                marginTop: 4,
+              }}
+            />
+          ) : null}
+        </div>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            lineHeight: 1.55,
+            color: 'var(--mx-fog)',
+          }}
+        >
+          {option.blurb}
+        </p>
+      </button>
 
       <div
         style={{
@@ -501,11 +509,9 @@ function ChallengeCard({
           gridTemplateColumns: `repeat(${difficulties.length}, 1fr)`,
           gap: 1,
           background: 'var(--mx-line-soft)',
-          border: '1px solid var(--mx-line-soft)',
+          borderTop: '1px solid var(--mx-line-soft)',
+          margin: '0 22px 22px',
         }}
-        // Stop bubbling so picking a difficulty doesn't re-fire onSelect.
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
       >
         {difficulties.map((d) => {
           const active = selected && difficulty === d.id;
@@ -554,7 +560,7 @@ function ChallengeCard({
           );
         })}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -754,10 +760,11 @@ function defaultFor(p: ProviderId): string {
   return PROVIDERS.find((x) => x.id === p)?.defaultModel ?? 'mock-1';
 }
 
-function availableProviders(c: ChallengeSlug) {
-  // Solver is a BFS reference player that only knows Treasure Hunt;
-  // hide it for other challenges.
-  return c === 'treasure-hunt' ? PROVIDERS : PROVIDERS.filter((p) => p.id !== 'solver');
+function availableProviders(_c: ChallengeSlug) {
+  // Solver knows every challenge now (BFS for Treasure Hunt, perfect
+  // recall map for Memory Probe). Keep the signature in case future
+  // challenges need to opt out.
+  return PROVIDERS;
 }
 
 function DiceIcon() {

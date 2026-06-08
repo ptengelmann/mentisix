@@ -1,5 +1,5 @@
 import type { Difficulty } from '@mentisix/sim';
-import type { ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
+import type { ChallengeSlug, ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { DB, type Db } from '../db/db.module.js';
@@ -7,7 +7,7 @@ import { runs } from '../db/schema.js';
 
 export type PersistedRun = {
   id: string;
-  challenge: 'treasure-hunt';
+  challenge: ChallengeSlug;
   difficulty: Difficulty;
   seed: number;
   provider: ProviderId;
@@ -59,7 +59,7 @@ export class RunsRepository {
     if (!row) throw new NotFoundException(`run ${id} not found`);
     const summary: RunSummary = {
       id: row.id,
-      challenge: row.challenge as 'treasure-hunt',
+      challenge: row.challenge as ChallengeSlug,
       difficulty: (row.difficulty as Difficulty) ?? 'medium',
       seed: row.seed,
       model: { provider: row.provider as ProviderId, model: row.model },

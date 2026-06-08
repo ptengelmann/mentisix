@@ -1,7 +1,8 @@
-import type { Difficulty, LeaderboardRow } from '@mentisix/types';
-import { DIFFICULTIES } from '@mentisix/types';
+import type { ChallengeSlug, Difficulty, LeaderboardRow } from '@mentisix/types';
+import { CHALLENGES, DIFFICULTIES } from '@mentisix/types';
 import { Card, Kicker, Tag } from '@mentisix/ui';
 import Link from 'next/link';
+import { ChallengeIcon } from '../../components/ChallengeIcon';
 import { Nav } from '../../components/Nav';
 import { ProviderLogo } from '../../components/ProviderLogo';
 
@@ -10,10 +11,13 @@ export const revalidate = 0;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
-async function fetchLeaderboard(difficulty: Difficulty): Promise<LeaderboardRow[]> {
+async function fetchLeaderboard(
+  challenge: ChallengeSlug,
+  difficulty: Difficulty,
+): Promise<LeaderboardRow[]> {
   try {
     const res = await fetch(
-      `${API_URL}/leaderboard/treasure-hunt?difficulty=${encodeURIComponent(difficulty)}`,
+      `${API_URL}/leaderboard/${encodeURIComponent(challenge)}?difficulty=${encodeURIComponent(difficulty)}`,
       { cache: 'no-store' },
     );
     if (!res.ok) return [];
@@ -29,6 +33,23 @@ const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   hard: 'Hard',
 };
 
+const CHALLENGE_LABEL: Record<ChallengeSlug, string> = {
+  'treasure-hunt': 'Treasure Hunt',
+  'memory-probe': 'Memory Probe',
+};
+
+const CHALLENGE_TAGLINE: Record<ChallengeSlug, string> = {
+  'treasure-hunt': 'Spatial reasoning · fog of war',
+  'memory-probe': 'In-context recall under noise',
+};
+
+function parseChallenge(raw: string | string[] | undefined): ChallengeSlug {
+  if (typeof raw === 'string' && (CHALLENGES as readonly string[]).includes(raw)) {
+    return raw as ChallengeSlug;
+  }
+  return 'treasure-hunt';
+}
+
 function parseDifficulty(raw: string | string[] | undefined): Difficulty {
   if (typeof raw === 'string' && (DIFFICULTIES as readonly string[]).includes(raw)) {
     return raw as Difficulty;
@@ -36,7 +57,7 @@ function parseDifficulty(raw: string | string[] | undefined): Difficulty {
   return 'medium';
 }
 
-type SearchParams = Promise<{ difficulty?: string | string[] }>;
+type SearchParams = Promise<{ challenge?: string | string[]; difficulty?: string | string[] }>;
 
 export default async function LeaderboardPage({
   searchParams,
@@ -44,8 +65,9 @@ export default async function LeaderboardPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+  const challenge = parseChallenge(params.challenge);
   const difficulty = parseDifficulty(params.difficulty);
-  const rows = await fetchLeaderboard(difficulty);
+  const rows = await fetchLeaderboard(challenge, difficulty);
 
   return (
     <>
@@ -69,7 +91,7 @@ export default async function LeaderboardPage({
               color: 'var(--mx-bone)',
             }}
           >
-            Treasure Hunt v0
+            {CHALLENGE_LABEL[challenge]} v0
           </h1>
           <p
             style={{
@@ -86,11 +108,15 @@ export default async function LeaderboardPage({
           </p>
         </div>
 
-        <DifficultyTabs current={difficulty} />
+        <ChallengeTabs current={challenge} difficulty={difficulty} />
+
+        <div style={{ marginTop: 20 }}>
+          <DifficultyTabs challenge={challenge} current={difficulty} />
+        </div>
 
         <div style={{ marginTop: 20 }}>
           <Card
-            title={`${DIFFICULTY_LABEL[difficulty]} · all-time`}
+            title={`${CHALLENGE_LABEL[challenge]} · ${DIFFICULTY_LABEL[difficulty]} · all-time`}
             meta={<Tag state="pass">{rows.length} entries</Tag>}
           >
             {rows.length === 0 ? <EmptyState /> : <Table rows={rows} />}
@@ -116,7 +142,78 @@ export default async function LeaderboardPage({
   );
 }
 
-function DifficultyTabs({ current }: { current: Difficulty }) {
+function ChallengeTabs({
+  current,
+  difficulty,
+}: {
+  current: ChallengeSlug;
+  difficulty: Difficulty;
+}) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${CHALLENGES.length}, 1fr)`,
+        gap: 1,
+        background: 'var(--mx-line-soft)',
+        border: '1px solid var(--mx-line-soft)',
+      }}
+    >
+      {CHALLENGES.map((c) => {
+        const active = current === c;
+        return (
+          <Link
+            key={c}
+            href={`/leaderboard?challenge=${c}&difficulty=${difficulty}`}
+            style={{
+              background: active ? 'var(--mx-slate)' : 'var(--mx-void)',
+              padding: '18px 16px',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              color: active ? 'var(--mx-signal)' : 'var(--mx-fog)',
+              transition: 'color var(--mx-dur) var(--mx-ease)',
+            }}
+          >
+            <ChallengeIcon challenge={c} size={28} />
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em',
+                  color: active ? 'var(--mx-signal)' : 'var(--mx-bone)',
+                }}
+              >
+                {CHALLENGE_LABEL[c]}
+              </span>
+              <span
+                style={{
+                  fontFamily: 'var(--mx-font-mono)',
+                  fontSize: 10,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: 'var(--mx-fog-dim)',
+                }}
+              >
+                {CHALLENGE_TAGLINE[c]}
+              </span>
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function DifficultyTabs({
+  challenge,
+  current,
+}: {
+  challenge: ChallengeSlug;
+  current: Difficulty;
+}) {
   return (
     <div
       style={{
@@ -132,7 +229,7 @@ function DifficultyTabs({ current }: { current: Difficulty }) {
         return (
           <Link
             key={d}
-            href={`/leaderboard?difficulty=${d}`}
+            href={`/leaderboard?challenge=${challenge}&difficulty=${d}`}
             style={{
               background: active ? 'var(--mx-slate)' : 'var(--mx-void)',
               padding: '14px 12px',

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Difficulty } from '@mentisix/sim';
-import type { ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
+import type { ChallengeSlug, ProviderId, RunEvent, RunStatus, RunSummary } from '@mentisix/types';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { type Observable, ReplaySubject } from 'rxjs';
 import { HarnessService } from '../harness/harness.service.js';
@@ -10,7 +10,7 @@ import { RunsRepository } from './runs.repository.js';
 
 type RunRecord = {
   id: string;
-  challenge: 'treasure-hunt';
+  challenge: ChallengeSlug;
   difficulty: Difficulty;
   seed: number;
   model: { provider: ProviderId; model: string };
@@ -47,7 +47,7 @@ export class RunsService {
 
     const record: RunRecord = {
       id,
-      challenge: dto.challenge,
+      challenge: dto.challenge as ChallengeSlug,
       difficulty: (dto.difficulty as Difficulty | undefined) ?? 'medium',
       seed,
       model: { provider: dto.model.provider as ProviderId, model: dto.model.model },
