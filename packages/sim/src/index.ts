@@ -58,6 +58,7 @@ export {
   type ProbeState,
   type ProbeStatus,
   type ProbeTurn,
+  type TurnKind,
 } from './memory-probe/index.js';
 
 export const SIM_VERSION = '0.2.0';

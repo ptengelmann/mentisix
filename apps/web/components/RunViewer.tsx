@@ -7,6 +7,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { client } from '../lib/api';
 import { type RunUiState, initialState, reducer } from '../lib/run-state';
 import { GridCanvas } from './GridCanvas';
+import { MemoryProbeView } from './MemoryProbeView';
 import { ReasoningFeed } from './ReasoningFeed';
 import { RunSetup } from './RunSetup';
 import { StatsReadout } from './StatsReadout';
@@ -93,18 +94,17 @@ export function RunViewer() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns:
-            lastReq?.challenge === 'memory-probe'
-              ? 'minmax(0, 1fr)'
-              : 'minmax(0, auto) minmax(280px, 1fr)',
-          gap: 20,
-          alignItems: 'start',
-        }}
-      >
-        {lastReq?.challenge !== 'memory-probe' ? (
+      {lastReq?.challenge === 'memory-probe' && state.mp ? (
+        <MemoryProbeView mp={state.mp} reasonings={state.reasonings} />
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, auto) minmax(280px, 1fr)',
+            gap: 20,
+            alignItems: 'start',
+          }}
+        >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Card title="Grid · Treasure Hunt v0">
               <div style={{ padding: 20 }}>
@@ -126,33 +126,14 @@ export function RunViewer() {
               msUsed={state.msUsed}
             />
           </div>
-        ) : null}
 
-        <Card
-          title={lastReq?.challenge === 'memory-probe' ? 'Live reasoning' : 'Reasoning'}
-          meta={
-            lastReq?.challenge === 'memory-probe' ? (
-              <span
-                style={{
-                  fontFamily: 'var(--mx-font-mono)',
-                  fontSize: 11,
-                  color: 'var(--mx-fog-dim)',
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                turn {state.step} · open replay for full conversation log
-              </span>
-            ) : (
-              inventoryLabel(state.inventory)
-            )
-          }
-        >
-          <div style={{ height: 560, maxHeight: 'calc(100dvh - 280px)' }}>
-            <ReasoningFeed entries={state.reasonings} />
-          </div>
-        </Card>
-      </div>
+          <Card title="Reasoning" meta={inventoryLabel(state.inventory)}>
+            <div style={{ height: 560, maxHeight: 'calc(100dvh - 280px)' }}>
+              <ReasoningFeed entries={state.reasonings} />
+            </div>
+          </Card>
+        </div>
+      )}
 
       {state.status === 'done' && state.finalScore ? (
         <FinalCard

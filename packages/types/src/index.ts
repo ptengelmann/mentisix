@@ -12,6 +12,7 @@ import type {
   Difficulty,
   KeyColor,
   Position,
+  TurnKind,
   WorldStatus,
 } from '@mentisix/sim';
 
@@ -149,7 +150,19 @@ export type RunEvent =
   // Memory Probe events. Event kinds are namespaced with mp_ so the
   // wire type stays a single discriminated union; the client checks
   // summary.challenge to pick the right renderer.
-  | { kind: 'mp_hello'; runId: string; seed: number; maxTurns: number; factCount: number }
+  | {
+      kind: 'mp_hello';
+      runId: string;
+      seed: number;
+      maxTurns: number;
+      factCount: number;
+      /**
+       * Kind of each turn in firing order. Lets the UI render the full
+       * timeline (tells, asks, distractors) upfront. Fact values and the
+       * expected answers for asks are still streamed only as turns fire.
+       */
+      schedule: readonly TurnKind[];
+    }
   | { kind: 'mp_action'; step: number; answer: string; expected?: string; correct?: boolean }
   | {
       kind: 'mp_state';
